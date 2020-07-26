@@ -158,8 +158,8 @@ light_pollution_heatmap <-
         layerId = "Sky Brightness (mag per arcsec^2)",
         attribution = 
             glue(
-                "Sky Brightness Data from <a href='http://doi.org/10.5880/GFZ.1.4.2016.001'>",
-                "'Supplement to: The New World Atlas of Artificial Night Sky Brightness'</a>"
+                "Sky Brightness Data: <a href='http://doi.org/10.5880/GFZ.1.4.2016.001'>",
+                "doi.org/10.5880/GFZ.1.4.2016.001</a>"
             )
     ) %>%
     
@@ -223,6 +223,8 @@ light_pollution_heatmap <-
     # reset button
     
     addResetMapButtonPosition(position = "bottomleft") %>%
+    
+    # adding mouse coordinates
     
     addMouseCoordinates(native.crs = TRUE)
 
