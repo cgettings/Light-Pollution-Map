@@ -1,6 +1,4 @@
----
-title: Light Pollution Map
----
+# Light Pollution Map
 
 Mapping light pollution in New York. 
 
