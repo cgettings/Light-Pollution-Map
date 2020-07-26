@@ -1,6 +1,6 @@
 # Light-Pollution-Map
 
-Mapping light pollution in New York. 
+Mapping light pollution in New York. Made using the `{leaflet}` package in `R` (Map code [here](/code/Light%20Pollution%20Map.R)).
 
 https://cgettings.github.io/Light-Pollution-Map/
 
