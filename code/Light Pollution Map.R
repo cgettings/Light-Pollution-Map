@@ -37,7 +37,7 @@ library(glue)
 source("code/functions/addResetMapButtonPosition.R")
 
 #-----------------------------------------------------------------------------------------#
-# Loading data
+# Loading data ----
 #-----------------------------------------------------------------------------------------#
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
@@ -130,7 +130,8 @@ light_pollution_heatmap <-
     
     enableTileCaching() %>%
     
-    addProviderTiles(providers$Stamen.TonerHybrid, group = "Streets") %>%
+    addProviderTiles(providers$Stamen.TonerHybrid, group = "Minimal") %>%
+    addProviderTiles(providers$OpenStreetMap.HOT, group = "Streets") %>%
     
     addTiles(
         urlTemplate = 
@@ -164,7 +165,7 @@ light_pollution_heatmap <-
     # adding controls
     
     addLayersControl(
-        baseGroups = c("Streets", "Topo"),
+        baseGroups = c("Minimal", "Streets", "Topo"),
         overlayGroups = "Sky Brightness (mag per arcsec^2)",
         options = layersControlOptions(collapsed = FALSE),
         position = "topright"
@@ -223,7 +224,7 @@ light_pollution_heatmap <-
     addResetMapButtonPosition(position = "bottomleft") %>%
     
     addMouseCoordinates(native.crs = TRUE)
-    
+
 
 #-----------------------------------------------------------------------------------------#
 # Saving map ----
