@@ -130,6 +130,7 @@ light_pollution_heatmap <-
     
     enableTileCaching() %>%
     
+    addProviderTiles(providers$Stamen.TonerBackground, group = "Minimal") %>%
     addProviderTiles(providers$Stamen.TonerHybrid, group = "Minimal") %>%
     addProviderTiles(providers$OpenStreetMap.HOT, group = "Streets") %>%
     
