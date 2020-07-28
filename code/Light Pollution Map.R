@@ -37,7 +37,7 @@ library(glue)
 source("code/functions/addResetMapButtonPosition.R")
 
 #-----------------------------------------------------------------------------------------#
-# Loading data ----
+# Loading data
 #-----------------------------------------------------------------------------------------#
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
@@ -67,31 +67,22 @@ state_bbox <-
 
 
 #-----------------------------------------------------------------------------------------#
-# Subsetting data
+# Subsetting and computing
 #-----------------------------------------------------------------------------------------#
 
 # the raster can get very large, so restricting it to specified states
 
-luminance_state <- 
+sky_brightness_df <- 
     luminance %>% 
     filter(x >= state_bbox$xmin) %>% 
     filter(x <= state_bbox$xmax) %>% 
     filter(y >= state_bbox$ymin) %>% 
     filter(y <= state_bbox$ymax) %>% 
-    as_tibble()
-
-gc()
-
-
-#-----------------------------------------------------------------------------------------#
-# Computing mag/arcsec^2
-#-----------------------------------------------------------------------------------------#
-
-# raw data values are in mcd/m^2
-
-sky_brightness <- 
-    luminance_state %>% 
+    as_tibble() %>% 
     rename(luminance = World_Atlas_2015) %>% 
+    
+    # Computing mag/arcsec^2
+    
     mutate(
         
         # replacing 0's with tiny value, so log10 will not give -Inf
@@ -101,7 +92,18 @@ sky_brightness <-
         
     ) %>% 
     
-    select(-luminance, -luminance_no0) %>% 
+    select(-luminance, -luminance_no0)
+
+gc()
+
+
+#-----------------------------------------------------------------------------------------#
+# Turning data frame back into a stars object
+#-----------------------------------------------------------------------------------------#
+
+sky_brightness <- 
+    
+    sky_brightness_df %>% 
     
     # transforming to stars object, to make adding to leaflet easier
     
