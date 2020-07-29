@@ -20,5 +20,5 @@ pagetitle: Light Pollution Map
         }
     </style>
 </head>
-<body>
+
 <iframe id="map" src="plots/light_pollution_heatmap.html" style="border:none; background:none"> </iframe>
