@@ -65,6 +65,11 @@ state_bbox <-
         map_center_y = rowMeans(select(., ymin, ymax))
     )
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# Closest dark points
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+closest_dark_points <- read_rds(here("data/closest_dark_points.rds"))
 
 #-----------------------------------------------------------------------------------------#
 # Subsetting and computing
@@ -93,6 +98,8 @@ sky_brightness_df <-
     ) %>% 
     
     select(-luminance, -luminance_no0)
+
+rm(luminance)
 
 gc()
 
