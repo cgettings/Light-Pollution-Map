@@ -1,10 +1,10 @@
 # Light Pollution Map
 
-Mapping light pollution in New York. 
+Mapping light pollution in New York and New England. 
 
 https://cgettings.github.io/Light-Pollution-Map/
 
-[![Screenshot of map](screenshot.png)](https://cgettings.github.io/Light-Pollution-Map/)
+[![Screenshot of map](map_screenshot.png)](https://cgettings.github.io/Light-Pollution-Map/)
 
 ([Map code](/code/Light_Pollution_Map.R))
 
