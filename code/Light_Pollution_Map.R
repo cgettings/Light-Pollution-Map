@@ -17,7 +17,6 @@
 library(raster)
 library(tidyverse)
 library(sf)
-library(rgdal)
 library(stars)
 library(leaflet)
 library(leaflet.extras)
@@ -27,6 +26,8 @@ library(viridisLite)
 library(htmlwidgets)
 library(here)
 library(glue)
+library(tmap)
+library(tigris)
 
 #-----------------------------------------------------------------------------------------#
 # Loading custom functions
@@ -41,15 +42,10 @@ source("code/functions/addResetMapButtonPosition.R")
 #-----------------------------------------------------------------------------------------#
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# luminance
+# Closest dark points
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
-# downloaded from http://doi.org/10.5880/GFZ.1.4.2016.001
-
-luminance <- 
-    raster(here("data/World_Atlas_2015.tif")) %>% 
-    st_as_stars(ignore_file = TRUE)
-
+closest_dark_points <- read_rds(here("data/closest_dark_points.rds"))
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # bounding boxes for states
@@ -57,33 +53,84 @@ luminance <-
 
 # downloaded from https://anthonylouisdagostino.com/bounding-boxes-for-all-us-states/
 
+# the raster can get very large, so restricting it to specified states
+
 state_bbox <- 
     read_csv(here("data/US_State_Bounding_Boxes.csv")) %>% 
-    filter(STUSPS == "NY") %>% 
+    filter(STUSPS %in% c("NY", "CT", "NH", "VT", "MA", "ME", "RI")) %>% 
     mutate(
         map_center_x = rowMeans(select(., xmin, xmax)),
         map_center_y = rowMeans(select(., ymin, ymax))
     )
 
+state_extent <- 
+    with(
+        state_bbox, 
+        extent(min(xmin), max(xmax), min(ymin), max(ymax))
+    )
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# Closest dark points
+# border for states
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
-closest_dark_points <- read_rds(here("data/closest_dark_points.rds"))
+state_border <- 
+    states(cb = TRUE) %>% 
+    st_as_sf() %>% 
+    filter(STUSPS %in% c("NY", "CT", "NH", "VT", "MA", "ME", "RI")) %>% 
+    st_transform(crs = st_crs(4326)) %>%
+    as_tibble()
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# luminance
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+# downloaded from http://doi.org/10.5880/GFZ.1.4.2016.001
+
+# clipping to within state's bounding box as raster (b/c on disk), to limit the massive 
+#   amount of memory a whole-world raster takes up
+
+luminance <- 
+    raster(here("data/World_Atlas_2015.tif")) %>% 
+    crop(state_extent) %>% 
+    st_as_stars(ignore_file = TRUE) %>% 
+    st_set_crs(st_crs(4326))
 
 #-----------------------------------------------------------------------------------------#
 # Subsetting and computing
 #-----------------------------------------------------------------------------------------#
 
-# the raster can get very large, so restricting it to specified states
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# finding which points are within state border
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
-sky_brightness_df <- 
+luminance_in_state <- 
+    st_intersects(
+        luminance, 
+        state_border$geometry %>% st_combine(), 
+        sparse = FALSE, 
+        as_points = TRUE,
+        model = "closed"
+    ) %>% 
+    as.logical()
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# subsetting and computing
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+sky_brightness <- 
+    
     luminance %>% 
-    filter(x >= state_bbox$xmin) %>% 
-    filter(x <= state_bbox$xmax) %>% 
-    filter(y >= state_bbox$ymin) %>% 
-    filter(y <= state_bbox$ymax) %>% 
+    
+    # turning into a tbl to compute sky brightness
+    
     as_tibble() %>% 
+    
+    # use logical vector to filter rows
+    
+    filter(luminance_in_state) %>% 
+    
+    # renaming to something that makes sense
+    
     rename(luminance = World_Atlas_2015) %>% 
     
     # Computing mag/arcsec^2
@@ -97,20 +144,7 @@ sky_brightness_df <-
         
     ) %>% 
     
-    select(-luminance, -luminance_no0)
-
-rm(luminance)
-
-gc()
-
-
-#-----------------------------------------------------------------------------------------#
-# Turning data frame back into a stars object
-#-----------------------------------------------------------------------------------------#
-
-sky_brightness <- 
-    
-    sky_brightness_df %>% 
+    select(-luminance, -luminance_no0) %>% 
     
     # transforming to stars object, to make adding to leaflet easier
     
@@ -118,7 +152,7 @@ sky_brightness <-
     
     # re-setting CRS to original data
     
-    st_set_crs(value = st_crs(luminance))
+    st_set_crs(value = st_crs(4326))
 
 
 #=========================================================================================#
@@ -197,9 +231,9 @@ light_pollution_heatmap <-
     # setting view params based on state
     
     setView(
-        lng = state_bbox$map_center_x,
-        lat = state_bbox$map_center_y,
-        zoom = 7
+        lng = mean(c(state_extent@xmin, state_extent@xmax)),
+        lat = mean(c(state_extent@ymin, state_extent@ymax)),
+        zoom = 6
     ) %>%
     
     # allowing user to place a marker
@@ -248,7 +282,6 @@ saveWidget(
     selfcontained = TRUE,
     title = "Light Pollution Heat Map"
 )
-
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
