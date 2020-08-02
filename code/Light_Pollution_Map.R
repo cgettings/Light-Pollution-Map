@@ -100,7 +100,7 @@ luminance <-
 #-----------------------------------------------------------------------------------------#
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# finding which points are within state border
+# finding which points are within specified borders
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 luminance_in_state <- 
@@ -282,7 +282,6 @@ saveWidget(
     selfcontained = TRUE,
     title = "Light Pollution Heat Map"
 )
-
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
