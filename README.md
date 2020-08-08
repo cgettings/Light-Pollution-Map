@@ -12,7 +12,7 @@ Inspired by the awesome [lightpollutionmap.info](https://www.lightpollutionmap.i
 
 ---
 
-**TODO:** Given arbitrary location, find nearest place that is 1 mag/arcsec^2 darker. Maybe in a Shiny app.
+**TODO:** Add more point filtering & selection options
 
 ---
 
