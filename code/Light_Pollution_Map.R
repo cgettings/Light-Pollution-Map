@@ -57,7 +57,7 @@ state_extent <-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 state_border <- 
-    states(cb = TRUE) %>% 
+    states(cb = TRUE, resolution = "500k") %>% 
     st_as_sf() %>% 
     filter(STUSPS %in% c("NY", "CT", "NH", "VT", "MA", "ME", "RI", "PA", "NJ", "MD", "DE")) %>%
     st_transform(crs = st_crs(4326)) %>%
@@ -88,8 +88,7 @@ luminance_in_state <-
         luminance, 
         state_border$geometry %>% st_combine(), 
         sparse = FALSE, 
-        as_points = TRUE,
-        model = "closed"
+        as_points = FALSE
     ) %>% 
     as.logical()
 
@@ -165,14 +164,6 @@ geoblaze_plugin <-
         all_files = FALSE
     )
 
-monospace_style <-
-    htmlDependency(
-        "monospace", "1",
-        src = c(file = here("code/functions")),
-        stylesheet = "monospace.css",
-        all_files = FALSE
-    )
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # `addResetMapButton` from {leaflet.extras}, but allowing specification of position
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
@@ -217,6 +208,11 @@ light_pollution_heatmap <-
     enableTileCaching() %>%
     
     addProviderTiles(
+        providers$OpenStreetMap.HOT, 
+        group = "Streets", 
+        options = providerTileOptions(zIndex = -1000)
+    ) %>%
+    addProviderTiles(
         providers$Stamen.TonerBackground, 
         group = "Minimal", 
         options = providerTileOptions(zIndex = -1000)
@@ -224,11 +220,6 @@ light_pollution_heatmap <-
     addProviderTiles(
         providers$Stamen.TonerHybrid, 
         group = "Minimal", 
-        options = providerTileOptions(zIndex = -1000)
-    ) %>%
-    addProviderTiles(
-        providers$OpenStreetMap.HOT, 
-        group = "Streets", 
         options = providerTileOptions(zIndex = -1000)
     ) %>%
     
@@ -266,7 +257,7 @@ light_pollution_heatmap <-
     # adding controls
     
     addLayersControl(
-        baseGroups = c("Minimal", "Streets", "Topo"),
+        baseGroups = c("Streets", "Minimal", "Topo"),
         overlayGroups = "Sky Brightness (mag per arcsec^2)",
         options = layersControlOptions(collapsed = FALSE, autoZIndex = FALSE),
         position = "topright"
@@ -307,7 +298,6 @@ light_pollution_heatmap <-
     addAwesomeMarkersDependencies(libs = "fa") %>%
     
     registerPlugin(geoblaze_plugin) %>%
-    registerPlugin(monospace_style) %>% 
     
     # adding specialty JavaScript to find closest dark place to click
     

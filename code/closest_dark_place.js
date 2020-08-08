@@ -95,9 +95,18 @@ fetch(data_fl)
                 L.marker(e.latlng, {"icon": selected_point_icon})
                     .addTo(map)
                     .bindTooltip(
-                        "<b>mag: " + selected_brightness.toFixed(2) + "</b></br>" +
-                        e.latlng.lat.toFixed(2) + ", " + e.latlng.lng.toFixed(2), 
-                        {"offset": [0, 0], "className": "monospace", "sticky": true, "permanent": false}
+                        
+                        "<span style='font-family:sans-serif;font-size:130%;font-weight:bold'>" + 
+                        "mag: " + selected_brightness.toFixed(2) + 
+                        "</span>" + 
+                        "<br>" +
+                        
+                        "<span style='font-family:monospace;font-size:115%;'>" + 
+                        e.latlng.lat.toFixed(2) + ", " + e.latlng.lng.toFixed(2) +
+                        "</span>", 
+                        
+                        {"offset": [0, 0], "sticky": true, "permanent": false}
+                        
                     ).openTooltip();
             
             
@@ -182,9 +191,18 @@ fetch(data_fl)
                     L.marker([dark_point.grid_point.lat, dark_point.grid_point.lng], {"icon": dark_point_icon})
                         .addTo(map)
                         .bindTooltip(
-                            "<b>mag: " + dark_point.grid_point.alt.toFixed(2) + "</b></br>" +
+                            
+                            "<span style='font-family:sans-serif;font-size:130%;font-weight:bold'>" + 
+                            "mag: " + dark_point.grid_point.alt.toFixed(2) + 
+                            "</span>" + 
+                            "<br>" +
+                            
+                            "<span style='font-family:monospace;font-size:115%;'>" + 
                             dark_point.grid_point.lat.toFixed(2) + ", " + dark_point.grid_point.lng.toFixed(2), 
-                            {"offset": [0, 0], "className": "monospace", "sticky": true, "permanent": false}
+                            "</span>", 
+                            
+                            {"offset": [0, 0], "sticky": true, "permanent": false}
+                            
                         ).openTooltip();
                 
                 
@@ -198,8 +216,13 @@ fetch(data_fl)
                         ], 
                         {"color": "#0F284C", "weight": 4, "opacity": 0.85}).addTo(map)
                         .bindTooltip(
-                            "<b>" + (dark_point.distance/1000).toFixed(1) + " km</b>", 
-                            {"className": "monospace", "sticky": true, "permanent": false}
+                            
+                            "<span style='font-family:sans-serif;font-size:115%'>" + 
+                            (dark_point.distance/1000).toFixed(1) + " km", 
+                            "</span>", 
+                            
+                            {"sticky": true, "permanent": false}
+                            
                         ).openTooltip();
                 
                 // setting new bounds based on points
