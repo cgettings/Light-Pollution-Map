@@ -17,35 +17,20 @@
 library(raster)
 library(tidyverse)
 library(sf)
-library(stars)
 library(leaflet)
 library(leaflet.extras)
-library(leaflet.providers)
 library(leafem)
+library(stars)
 library(viridisLite)
 library(htmlwidgets)
+library(htmltools)
 library(here)
 library(glue)
-library(tmap)
 library(tigris)
-
-#-----------------------------------------------------------------------------------------#
-# Loading custom functions
-#-----------------------------------------------------------------------------------------#
-
-# `addResetMapButton` from {leaflet.extras}, but allowing specification of position
-
-source("code/functions/addResetMapButtonPosition.R")
 
 #-----------------------------------------------------------------------------------------#
 # Loading data
 #-----------------------------------------------------------------------------------------#
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# Closest dark points
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-
-closest_dark_points <- read_rds(here("data/closest_dark_points.rds"))
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # bounding boxes for states
@@ -53,11 +38,9 @@ closest_dark_points <- read_rds(here("data/closest_dark_points.rds"))
 
 # downloaded from https://anthonylouisdagostino.com/bounding-boxes-for-all-us-states/
 
-# the raster can get very large, so restricting it to specified states
-
 state_bbox <- 
     read_csv(here("data/US_State_Bounding_Boxes.csv")) %>% 
-    filter(STUSPS %in% c("NY", "CT", "NH", "VT", "MA", "ME", "RI")) %>% 
+    filter(STUSPS %in% c("NY", "CT", "NH", "VT", "MA", "ME", "RI", "PA", "NJ", "MD", "DE")) %>%
     mutate(
         map_center_x = rowMeans(select(., xmin, xmax)),
         map_center_y = rowMeans(select(., ymin, ymax))
@@ -76,7 +59,7 @@ state_extent <-
 state_border <- 
     states(cb = TRUE) %>% 
     st_as_sf() %>% 
-    filter(STUSPS %in% c("NY", "CT", "NH", "VT", "MA", "ME", "RI")) %>% 
+    filter(STUSPS %in% c("NY", "CT", "NH", "VT", "MA", "ME", "RI", "PA", "NJ", "MD", "DE")) %>%
     st_transform(crs = st_crs(4326)) %>%
     as_tibble()
 
@@ -85,9 +68,6 @@ state_border <-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 # downloaded from http://doi.org/10.5880/GFZ.1.4.2016.001
-
-# clipping to within state's bounding box as raster (b/c on disk), to limit the massive 
-#   amount of memory a whole-world raster takes up
 
 luminance <- 
     raster(here("data/World_Atlas_2015.tif")) %>% 
@@ -154,9 +134,59 @@ sky_brightness <-
     
     st_set_crs(value = st_crs(4326))
 
+# converting to tbl, to pass to onRender
+
+sky_brightness_coords <- sky_brightness %>% as_tibble()
+
+# getting bbox for setting map bounds
+
+sky_brightness_bbox <- st_bbox(sky_brightness)
+
+
+#-----------------------------------------------------------------------------------------#
+# Adding extras ----
+#-----------------------------------------------------------------------------------------#
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# plugins & dependencies
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+registerPlugin <- 
+    function(map, plugin) {
+        map$dependencies <- c(map$dependencies, list(plugin))
+        map
+    }
+
+geoblaze_plugin <-
+    htmlDependency(
+        "geoblaze", "1",
+        src = c(file = here("code/functions/geotiff")),
+        script = "geoblaze.web.min.js",
+        all_files = FALSE
+    )
+
+monospace_style <-
+    htmlDependency(
+        "monospace", "1",
+        src = c(file = here("code/functions")),
+        stylesheet = "monospace.css",
+        all_files = FALSE
+    )
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# `addResetMapButton` from {leaflet.extras}, but allowing specification of position
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+source("code/functions/addResetMapButtonPosition.R")
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# Custom JavaScript for `onRender`
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+closest_dark_place <- read_file(here("code/closest_dark_place.js"))
 
 #=========================================================================================#
-# Mapping ----
+# Mapping
 #=========================================================================================#
 
 #-----------------------------------------------------------------------------------------#
@@ -167,15 +197,40 @@ light_pollution_heatmap <-
     
     # basemap
     
-    leaflet() %>%
+    leaflet(
+        options = list(
+            "duration" = 0.375,
+            "zoomSnap" = 0.5,
+            "padding" = c(10, 10)
+        )
+    ) %>%
+    
+    fitBounds(
+        lng1 = sky_brightness_bbox[[1]],
+        lat1 = sky_brightness_bbox[[2]],
+        lng2 = sky_brightness_bbox[[3]],
+        lat2 = sky_brightness_bbox[[4]]
+    ) %>%
     
     # tiles
     
     enableTileCaching() %>%
     
-    addProviderTiles(providers$Stamen.TonerBackground, group = "Minimal") %>%
-    addProviderTiles(providers$Stamen.TonerHybrid, group = "Minimal") %>%
-    addProviderTiles(providers$OpenStreetMap.HOT, group = "Streets") %>%
+    addProviderTiles(
+        providers$Stamen.TonerBackground, 
+        group = "Minimal", 
+        options = providerTileOptions(zIndex = -1000)
+    ) %>%
+    addProviderTiles(
+        providers$Stamen.TonerHybrid, 
+        group = "Minimal", 
+        options = providerTileOptions(zIndex = -1000)
+    ) %>%
+    addProviderTiles(
+        providers$OpenStreetMap.HOT, 
+        group = "Streets", 
+        options = providerTileOptions(zIndex = -1000)
+    ) %>%
     
     addTiles(
         urlTemplate = 
@@ -188,22 +243,24 @@ light_pollution_heatmap <-
             glue(
                 "Map tiles by <a href='http://goto.arcgisonline.com/maps/USA_Topo_Maps'>Esri</a> - ",
                 "Map Data © 2013 National Geographic Society, i-cubed"
-            )
+            ), 
+        options = tileOptions(zIndex = -1000)
     ) %>% 
     
     # sky brightness raster
     
-    addStarsImage(
+    addGeoRaster(
         x = sky_brightness,
-        colors = inferno(256, alpha = .7, direction = -1),
-        project = TRUE, 
+        project = TRUE,
         group = "Sky Brightness (mag per arcsec^2)",
-        layerId = "Sky Brightness (mag per arcsec^2)",
-        attribution = 
-            glue(
-                "Sky Brightness Data: <a href='http://doi.org/10.5880/GFZ.1.4.2016.001'>",
-                "doi.org/10.5880/GFZ.1.4.2016.001</a>"
-            )
+        layerId = "raster",
+        resolution = 72,
+        colorOptions =
+            colorOptions(
+                palette = inferno(256, direction = -1),
+                na.color = "#00000000"
+            ),
+        options = tileOptions(zIndex = 1000)
     ) %>%
     
     # adding controls
@@ -211,7 +268,7 @@ light_pollution_heatmap <-
     addLayersControl(
         baseGroups = c("Minimal", "Streets", "Topo"),
         overlayGroups = "Sky Brightness (mag per arcsec^2)",
-        options = layersControlOptions(collapsed = FALSE),
+        options = layersControlOptions(collapsed = FALSE, autoZIndex = FALSE),
         position = "topright"
     ) %>%
     
@@ -220,34 +277,12 @@ light_pollution_heatmap <-
     addImageQuery(
         x = sky_brightness,
         group = "Sky Brightness (mag per arcsec^2)",
-        layerId = "Sky Brightness (mag per arcsec^2)",
         position = "topright",
         digits = 1,
         type = "mousemove",
         prefix = "",
         project = TRUE
-    ) %>% 
-    
-    # setting view params based on state
-    
-    setView(
-        lng = mean(c(state_extent@xmin, state_extent@xmax)),
-        lat = mean(c(state_extent@ymin, state_extent@ymax)),
-        zoom = 6
     ) %>%
-    
-    # allowing user to place a marker
-    
-    addDrawToolbar(
-        polylineOptions = FALSE,
-        polygonOptions = FALSE,
-        circleOptions = FALSE,
-        rectangleOptions = FALSE,
-        markerOptions = drawMarkerOptions(),
-        circleMarkerOptions = FALSE,
-        position = "topleft",
-        editOptions = editToolbarOptions()
-    ) %>% 
     
     # allowing user to search for locations
     
@@ -267,9 +302,23 @@ light_pollution_heatmap <-
     
     addResetMapButtonPosition(position = "bottomleft") %>%
     
-    # adding mouse coordinates
+    # registering dependencies
     
-    addMouseCoordinates(native.crs = TRUE)
+    addAwesomeMarkersDependencies(libs = "fa") %>%
+    
+    registerPlugin(geoblaze_plugin) %>%
+    registerPlugin(monospace_style) %>% 
+    
+    # adding specialty JavaScript to find closest dark place to click
+    
+    onRender(
+        str_c(
+            "function(el, x, data) {\n",
+            closest_dark_place,
+            "}"
+        ), 
+        data = sky_brightness_coords %>% drop_na()
+    )
 
 
 #-----------------------------------------------------------------------------------------#
@@ -278,9 +327,9 @@ light_pollution_heatmap <-
 
 saveWidget(
     widget = light_pollution_heatmap,
-    file = here("plots", "light_pollution_heatmap.html"),
+    file = here("plots", "light_pollution_heatmap_georaster.html"),
     selfcontained = TRUE,
-    title = "Light Pollution Heat Map"
+    title = "Light Pollution Heat Map, from Maryland to Maine"
 )
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
