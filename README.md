@@ -23,7 +23,7 @@ I created the map using `{leaflet}`, with a custom tile layer drawn from the "US
 
 The complicated part was writing the [custom JavaScript](/code/closest_dark_place.js) code. This script re-reads the raster data from the `document` object using `fetch`, then uses the `georaster` package (already loaded thanks to `leafem::addGeoRaster()`) to parse the data. (This is necessary because the raster data object created by `leafem::addGeoRaster()` only exists within the scope of the function call that adds the georaster layer.) The script then uses the [`geoblaze` package](https://github.com/GeoTIFF/geoblaze) to extract the (NN-interpolated) raster value from where the map was clicked. 
 
-Using that value, the script finds all points in the raw raster data that are between 1 and 1.75 mags darker than the clicked point. It then uses Leaflet's built-in `distanceTo` function to compute the distance between the click point and the filtered dark points, and then selects the closest one.
+Using that value, the script finds all points in the raw raster data that are between 1 and 1.75 mags darker than the clicked point (to reduce processing demands). It then uses Leaflet's built-in `distanceTo` function to compute the distance between the clicked point and the filtered dark points, and finally selects the closest one.
 
 These two points are then displayed on the map, with tooltips giving their properties, and a line that gives the distance between them. The script then sends the unformatted property values to the console.
 
