@@ -15,7 +15,7 @@ The map is available at: https://cgettings.github.io/Light-Pollution-Map/
 
 ### Data processing
 
-The sky brightness data comes from a whole-world geotiff file of simulated zenith radiance data, given in $mcd/m^2$. After reading the file into R using `raster::raster()`, I cropped it using a bounding box encompassing all of the states displayed (reducing the amount of data that would eventually be read into RAM), and then converted the raster into a `stars` object. This allowed me to use `{sf}` methods to further crop the raster using state boundary data from the [`{tigris}`](https://github.com/walkerke/tigris) package. Finally, I converted the `stars` raster into a `tibble`, converted `mcd/m^2` into `mag/arcsec^2`, and then turned the tibble back into a `stars` object for mapping.
+The sky brightness data comes from a whole-world geotiff file of simulated zenith radiance data, given in `mcd/m^2`. After reading the file into R using `raster::raster()`, I cropped it using a bounding box encompassing all of the states displayed (reducing the amount of data that would eventually be read into RAM), and then converted the raster into a `stars` object. This allowed me to use `{sf}` methods to further crop the raster using state boundary data from the [`{tigris}`](https://github.com/walkerke/tigris) package. Finally, I converted the `stars` raster into a `tibble`, converted `mcd/m^2` into `mag/arcsec^2`, and then turned the tibble back into a `stars` object for mapping.
 
 ### Mapping
 
@@ -39,7 +39,7 @@ These two points are then displayed on the map, with tooltips giving their prope
 
 ---
 
-<a name="footnote1">1.</a> Sky brightness values are in $mag/arcsec^2$. Explanation [here](https://en.wikipedia.org/wiki/Surface_brightness). [↩](#note1)<br>
+<a name="footnote1">1.</a> Sky brightness values are in `mag/arcsec^2`. Explanation [here](https://en.wikipedia.org/wiki/Surface_brightness). [↩](#note1)<br>
 <a name="footnote2">2.</a> Shout out to [Dan Jentzen](https://www.brighterboston.org/staff) for introducing me. [↩](#note2)<br>
 <a name="footnote3">3.</a> Falchi, Fabio; Cinzano, Pierantonio; Duriscoe, Dan; Kyba, Christopher C. M.; Elvidge, Christopher D.; Baugh, Kimberly; Portnov, Boris; Rybnikova, Nataliya A.; Furgoni, Riccardo (2016): Supplement to: The New World Atlas of Artificial Night Sky Brightness. V. 1.1. GFZ Data Services. http://doi.org/10.5880/GFZ.1.4.2016.001 [↩](#note3)<br>
 <a name="footnote4">4.</a> More information available [here](https://en.wikipedia.org/wiki/Naked_eye#In_astronomy). [↩](#note4)<br>
