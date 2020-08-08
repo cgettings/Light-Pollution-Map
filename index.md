@@ -21,4 +21,4 @@ pagetitle: Light Pollution Map
     </style>
 </head>
 
-<iframe id="map" src="plots/light_pollution_heatmap.html" style="border:none; background:none"> </iframe>
+<iframe id="map" src="plots/light_pollution_heatmap_georaster.html" style="border:none; background:none"> </iframe>
