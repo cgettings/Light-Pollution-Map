@@ -6,7 +6,7 @@ This map shows the brightness<sup id="note1">[1](#footnote1)</sup> of the night 
 
 The map is available at: https://cgettings.github.io/Light-Pollution-Map/
 
-[![Screenshot of map](map_screenshot.png)](https://cgettings.github.io/Light-Pollution-Map/)
+[![Screenshot of map](map_screenshot.png)](map_screenshot.png)
 
 ## Code
 
