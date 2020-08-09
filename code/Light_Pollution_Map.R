@@ -27,6 +27,7 @@ library(htmltools)
 library(here)
 library(glue)
 library(tigris)
+library(fs)
 
 #-----------------------------------------------------------------------------------------#
 # Loading data
@@ -156,10 +157,19 @@ registerPlugin <-
         map
     }
 
+fa_plugin <-
+    htmlDependency(
+        "fontawesome", "1",
+        src = c(file = path(path_home(), "node_modules/@fortawesome/fontawesome-free")),
+        stylesheet = "css/all.css",
+        all_files = TRUE
+    )
+
 geoblaze_plugin <-
     htmlDependency(
         "geoblaze", "1",
-        src = c(file = here("code/functions/geotiff")),
+        # src = c(file = here("code/functions/geotiff")),
+        src = c(file = path(path_home(), "node_modules/geoblaze/dist")),
         script = "geoblaze.web.min.js",
         all_files = FALSE
     )
@@ -169,6 +179,7 @@ geoblaze_plugin <-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 source("code/functions/addResetMapButtonPosition.R")
+# source("code/functions/clear_darkpoint_features.R")
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # Custom JavaScript for `onRender`
@@ -289,14 +300,15 @@ light_pollution_heatmap <-
             )
     ) %>% 
     
-    # reset button
+    # reset buttons
     
     addResetMapButtonPosition(position = "bottomleft") %>%
     
     # registering dependencies
     
-    addAwesomeMarkersDependencies(libs = "fa") %>%
+    addAwesomeMarkersDependencies(libs = "") %>%
     
+    registerPlugin(fa_plugin) %>%
     registerPlugin(geoblaze_plugin) %>%
     
     # adding specialty JavaScript to find closest dark place to click
@@ -310,6 +322,7 @@ light_pollution_heatmap <-
         data = sky_brightness_coords %>% drop_na()
     )
 
+light_pollution_heatmap
 
 #-----------------------------------------------------------------------------------------#
 # Saving map ----

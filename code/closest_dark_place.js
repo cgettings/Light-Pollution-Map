@@ -105,7 +105,7 @@ fetch(data_fl)
                         e.latlng.lat.toFixed(2) + ", " + e.latlng.lng.toFixed(2) +
                         "</span>", 
                         
-                        {"offset": [0, 0], "sticky": true, "permanent": false}
+                        {offset: [0, 0], sticky: false, permanent: true}
                         
                     ).openTooltip();
             
@@ -201,7 +201,7 @@ fetch(data_fl)
                             dark_point.grid_point.lat.toFixed(2) + ", " + dark_point.grid_point.lng.toFixed(2), 
                             "</span>", 
                             
-                            {"offset": [0, 0], "sticky": true, "permanent": false}
+                            {offset: [0, 0], sticky: false, permanent: true}
                             
                         ).openTooltip();
                 
@@ -221,7 +221,7 @@ fetch(data_fl)
                             (dark_point.distance/1000).toFixed(1) + " km", 
                             "</span>", 
                             
-                            {"sticky": true, "permanent": false}
+                            {sticky: false, permanent: true}
                             
                         ).openTooltip();
                 
@@ -237,5 +237,66 @@ fetch(data_fl)
             }
             
         });
+        
+    // easyButton to clear the markers
+    
+    L.easyButton({
+            position: "bottomleft",
+            states: [{
+                title: "Clear Markers",
+                icon: "fa-broom",
+                
+                onClick: function() {
+                    if (selected_point_marker) map.removeLayer(selected_point_marker);
+                    if (dark_point_marker) map.removeLayer(dark_point_marker);
+                    if (selected_dark_line) map.removeLayer(selected_dark_line);
+                }
+                }]
+    }).addTo(map);
+    
+    // easyButton to toggle the tooltips
+    
+    L.easyButton({
+        position: "bottomleft",
+        states: [{
+            
+            stateName: "close-tooltips",
+            icon: "fa-comment",
+            title: "Close tooltips",
+            
+            onClick: function(control) {
+                if (selected_point_marker && selected_point_marker.isTooltipOpen()) {
+                    selected_point_marker.closeTooltip();
+                }
+                if (dark_point_marker && dark_point_marker.isTooltipOpen()) {
+                    dark_point_marker.closeTooltip();
+                }
+                if (selected_dark_line && selected_dark_line.isTooltipOpen()) {
+                    selected_dark_line.closeTooltip();
+                }
+                control.state("open-tooltips");
+            }
+        }, {
+            
+            stateName: "open-tooltips",
+            icon: "fa-comment-slash",
+            title: "Open tooltips",
+            
+            onClick: function(control) {
+                if (selected_point_marker && !selected_point_marker.isTooltipOpen()) {
+                    selected_point_marker.openTooltip();
+                }
+                if (dark_point_marker && !dark_point_marker.isTooltipOpen()) {
+                    dark_point_marker.openTooltip();
+                }
+                if (selected_dark_line && !selected_dark_line.isTooltipOpen()) {
+                    selected_dark_line.openTooltip();
+                }
+                control.state("close-tooltips");
+            }
+        }]
+    }).addTo(map);
+
     });
+
 });
