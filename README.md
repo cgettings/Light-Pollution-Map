@@ -21,9 +21,9 @@ The sky brightness data comes from a whole-world geotiff file of simulated zenit
 
 I created the map using `{leaflet}`, with a custom tile layer drawn from the "USA_Topo_Maps" esri tile layer hosted on [ArcGIS online](https://services.arcgisonline.com/ArcGIS/rest/services/USA_Topo_Maps/MapServer/). I added the `stars` raster to the map using `leafem::addGeoRaster()`, with the mousover values created using `leafem::addImageQuery()`, and the OSM search using `leaflet.extras::addSearchOSM()`. The map view reset botton is a modification of `leaflet.extras::addResetMapButton()` which simply adds a `position` argument to the `easyButton()` call. Finally, I added map dependencies using the [`registerPlugin`](http://rstudio.github.io/leaflet/extending.html) and `leaflet.extras::addAwesomeMarkersDependencies()` function, and then passed to `htmlwidgets::onRender()` my custom JavaScript and a `tbl` of raw raster data.
 
-This [custom JavaScript](/code/closest_dark_place.js) code re-reads the raster data from the `document` object using `fetch`, then uses the `georaster` package (already loaded thanks to `leafem::addGeoRaster()`) to parse the data. (This is necessary because the raster data object created by `leafem::addGeoRaster()` only exists within the scope of the function call that adds the georaster layer.) The script then uses the [`geoblaze` package](https://github.com/GeoTIFF/geoblaze) to extract the (NN-interpolated) raster value from where the map was clicked. 
+This [custom JavaScript](/code/closest_dark_place.js) code re-reads the raster data from the `document` object using `fetch`, then uses the `georaster` package (already loaded thanks to `leafem::addGeoRaster()`) to parse the data. (This is necessary because the raster data object created by `leafem::addGeoRaster()` only exists within the scope of the function call that adds the georaster layer.) The script then uses the [`geoblaze` package](https://github.com/GeoTIFF/geoblaze) to extract the raster value from where the map was clicked. 
 
-Using that value, the script finds all points in the raw raster data that are between 1 and 1.75 mags darker than the clicked point (to reduce processing demands). It then uses Leaflet's built-in `distanceTo` function to compute the distance between the clicked point and the filtered dark points, and finally selects the closest one.
+Using that value, the script finds all points in the raw raster data that are between 1 and 1.75<sup id="note4">[4](#footnote4)</sup> mags darker than the clicked point. It then uses Leaflet's built-in `distanceTo` function to compute the distance between the clicked point and the filtered dark points, and finally selects the closest one.
 
 These two points are then displayed on the map, with tooltips giving their properties, and a line that gives the distance between them. The script then sends the unformatted property values to the console.
 
@@ -35,11 +35,12 @@ These two points are then displayed on the map, with tooltips giving their prope
 * Show darkest point(s) within a specified radius of clicked point
 * Change magnitude difference between clicked point and dark points
 * Specify magnitude range of dark points
-* Find dark points where specified celestial objects are visible<sup id="note4">[4](#footnote4)</sup>
+* Find dark points where specified celestial objects are visible<sup id="note4">[5](#footnote5)</sup>
 
 ---
 
 <a name="footnote1">1.</a> Sky brightness values are in `mag/arcsec^2`. Explanation [here](https://en.wikipedia.org/wiki/Surface_brightness). [↩](#note1)<br>
 <a name="footnote2">2.</a> Shout out to [Dan Jentzen](https://www.brighterboston.org/staff) for introducing me. [↩](#note2)<br>
 <a name="footnote3">3.</a> Falchi, Fabio; Cinzano, Pierantonio; Duriscoe, Dan; Kyba, Christopher C. M.; Elvidge, Christopher D.; Baugh, Kimberly; Portnov, Boris; Rybnikova, Nataliya A.; Furgoni, Riccardo (2016): Supplement to: The New World Atlas of Artificial Night Sky Brightness. V. 1.1. GFZ Data Services. http://doi.org/10.5880/GFZ.1.4.2016.001 [↩](#note3)<br>
-<a name="footnote4">4.</a> More information available [here](https://en.wikipedia.org/wiki/Naked_eye#In_astronomy). [↩](#note4)<br>
+<a name="footnote4">4.</a> An arbitrary cutoff that reduces processing demands. [↩](#note4)<br>
+<a name="footnote5">5.</a> More information available [here](https://en.wikipedia.org/wiki/Naked_eye#In_astronomy). [↩](#note5)<br>
