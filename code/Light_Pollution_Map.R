@@ -14,6 +14,7 @@
 # Loading libraries
 #-----------------------------------------------------------------------------------------#
 
+library(jsonlite)
 library(raster)
 library(tidyverse)
 library(sf)
@@ -134,14 +135,20 @@ sky_brightness <-
     
     st_set_crs(value = st_crs(4326))
 
-# converting to tbl, to pass to onRender
 
-sky_brightness_coords <- sky_brightness %>% as_tibble()
-
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # getting bbox for setting map bounds
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 sky_brightness_bbox <- st_bbox(sky_brightness)
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# converting to tbl, to pass to onRender
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+sky_brightness_coords <- sky_brightness %>% as_tibble() %>% drop_na()
+
+gc()
 
 #-----------------------------------------------------------------------------------------#
 # Adding extras ----
@@ -157,29 +164,51 @@ registerPlugin <-
         map
     }
 
+fa_dir <- path(path_home(), "node_modules/@fortawesome/fontawesome-free")
+
 fa_plugin <-
     htmlDependency(
-        "fontawesome", "1",
-        src = c(file = path(path_home(), "node_modules/@fortawesome/fontawesome-free")),
+        name = "fontawesome", 
+        version = fromJSON(path(fa_dir, "package.json"))$version,
+        src = c(file = fa_dir),
         stylesheet = "css/all.css",
         all_files = TRUE
     )
 
+geoblaze_dir <- path(path_home(), "node_modules/geoblaze")
+
 geoblaze_plugin <-
     htmlDependency(
-        "geoblaze", "1",
-        # src = c(file = here("code/functions/geotiff")),
-        src = c(file = path(path_home(), "node_modules/geoblaze/dist")),
+        name = "geoblaze", 
+        version = fromJSON(path(geoblaze_dir, "package.json"))$version,
+        src = c(file = path(geoblaze_dir, "dist")),
         script = "geoblaze.web.min.js",
         all_files = FALSE
     )
 
+ExtraMarkers_dir <- path(path_home_r(), "R", "Leaflet.ExtraMarkers")
+
+ExtraMarkers_plugin <-
+    htmlDependency(
+        name = "ExtraMarkers", 
+        version = fromJSON(path(ExtraMarkers_dir, "package.json"))$version,
+        src = c(file = path(ExtraMarkers_dir, "dist")),
+        stylesheet = "css/leaflet.extra-markers.min.css",
+        script = "js/leaflet.extra-markers.min.js",
+        all_files = TRUE
+    )
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# `addResetMapButton` from {leaflet.extras}, but allowing specification of position
+# modifications of {leaflet} functions
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
+# `addResetMapButton` from {leaflet.extras}, but allowing specification of position
+
 source("code/functions/addResetMapButtonPosition.R")
-# source("code/functions/clear_darkpoint_features.R")
+
+# `addEasyButton` from {leaflet}, but removing fontawesome dependency (so I can use it from node)
+
+source("code/functions/addEasyButtonNoFaDeps.R")
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # Custom JavaScript for `onRender`
@@ -254,9 +283,9 @@ light_pollution_heatmap <-
     addGeoRaster(
         x = sky_brightness,
         project = TRUE,
-        group = "Sky Brightness (mag per arcsec^2)",
+        group = "Sky Brightness",
         layerId = "raster",
-        resolution = 72,
+        resolution = 64,
         colorOptions =
             colorOptions(
                 palette = inferno(256, direction = -1),
@@ -269,7 +298,7 @@ light_pollution_heatmap <-
     
     addLayersControl(
         baseGroups = c("Streets", "Minimal", "Topo"),
-        overlayGroups = "Sky Brightness (mag per arcsec^2)",
+        overlayGroups = "Sky Brightness",
         options = layersControlOptions(collapsed = FALSE, autoZIndex = FALSE),
         position = "topright"
     ) %>%
@@ -278,7 +307,7 @@ light_pollution_heatmap <-
     
     addImageQuery(
         x = sky_brightness,
-        group = "Sky Brightness (mag per arcsec^2)",
+        group = "Sky Brightness",
         position = "topright",
         digits = 1,
         type = "mousemove",
@@ -306,10 +335,11 @@ light_pollution_heatmap <-
     
     # registering dependencies
     
-    addAwesomeMarkersDependencies(libs = "") %>%
+    addAwesomeMarkersDependencies(libs = c("ion", "glyphicon")) %>%
     
     registerPlugin(fa_plugin) %>%
     registerPlugin(geoblaze_plugin) %>%
+    registerPlugin(ExtraMarkers_plugin) %>%
     
     # adding specialty JavaScript to find closest dark place to click
     
@@ -319,10 +349,9 @@ light_pollution_heatmap <-
             closest_dark_place,
             "}"
         ), 
-        data = sky_brightness_coords %>% drop_na()
+        data = sky_brightness_coords
     )
 
-light_pollution_heatmap
 
 #-----------------------------------------------------------------------------------------#
 # Saving map ----

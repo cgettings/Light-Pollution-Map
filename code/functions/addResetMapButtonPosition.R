@@ -2,9 +2,9 @@
 addResetMapButtonPosition <- 
     function(map, position = "topleft") {
         map %>% 
-            addEasyButton(
+            addEasyButtonNoFaDeps(
                 easyButton(
-                    icon = "ion-arrow-shrink",
+                    icon = "fa-compress",
                     title = "Reset View",
                     onClick = JS("function(btn, map){ map.setView(map._initialCenter, map._initialZoom); }"),
                     position = position

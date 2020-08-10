@@ -75,13 +75,14 @@ fetch(data_fl)
             // setting icon properties for awesome marker
             
             var selected_point_icon = 
-                L.AwesomeMarkers.icon({
-                    "icon": "home",
-                    "iconColor": "#000000", // "black" doesn't work here for some reason
-                    "prefix": "fa",
-                    "markerColor": "blue"
-            });
-            
+                L.ExtraMarkers.icon({
+                    icon: "fa-bullseye",
+                    iconColor: "#000000",
+                    prefix: "fa",
+                    markerColor: "#34FEF1",
+                    shape: 'circle',
+                    svg: true
+            });            
             
             // getting the (interpolated) brightness value at the click point, in [lng, lat] form
             //  (it's an array, not a scalar, so you need to extract it with "[0]")
@@ -154,11 +155,13 @@ fetch(data_fl)
             // formatting icon for dark point marker(s)
             
             var dark_point_icon = 
-                L.AwesomeMarkers.icon({
-                    "icon": "star",
-                    "iconColor": "#FFFFFF", // "white" doesn't work here for some reason
-                    "prefix": "fa",
-                    "markerColor": "darkblue"
+                L.ExtraMarkers.icon({
+                    icon: "ion-star",
+                    iconColor: "#FFFFFF",
+                    prefix: "ion",
+                    markerColor: "black",
+                    shape: 'square',
+                    svg: true
             });
             
             
@@ -214,7 +217,7 @@ fetch(data_fl)
                             e.latlng, 
                             [dark_point.grid_point.lat, dark_point.grid_point.lng]
                         ], 
-                        {"color": "#0F284C", "weight": 4, "opacity": 0.85}).addTo(map)
+                        {"color": "black", "weight": 4, "opacity": 0.85}).addTo(map)
                         .bindTooltip(
                             
                             "<span style='font-family:sans-serif;font-size:115%'>" + 
@@ -243,8 +246,8 @@ fetch(data_fl)
     L.easyButton({
             position: "bottomleft",
             states: [{
-                title: "Clear Markers",
-                icon: "fa-broom",
+                title: "Clear",
+                icon: "fas fa-trash",
                 
                 onClick: function() {
                     if (selected_point_marker) map.removeLayer(selected_point_marker);
@@ -254,15 +257,16 @@ fetch(data_fl)
                 }]
     }).addTo(map);
     
+    
     // easyButton to toggle the tooltips
     
     L.easyButton({
         position: "bottomleft",
         states: [{
             
-            stateName: "close-tooltips",
-            icon: "fa-comment",
-            title: "Close tooltips",
+            stateName: "tooltips-on",
+            icon: "fa-comment-alt",
+            title: "Tooltips: ON",
             
             onClick: function(control) {
                 if (selected_point_marker && selected_point_marker.isTooltipOpen()) {
@@ -274,13 +278,13 @@ fetch(data_fl)
                 if (selected_dark_line && selected_dark_line.isTooltipOpen()) {
                     selected_dark_line.closeTooltip();
                 }
-                control.state("open-tooltips");
+                control.state("tooltips-off");
             }
         }, {
             
-            stateName: "open-tooltips",
-            icon: "fa-comment-slash",
-            title: "Open tooltips",
+            stateName: "tooltips-off",
+            icon: "<i class='fa' style='color:#BDBDBD'> &#xf27a </i>",
+            title: "Tooltips: OFF",
             
             onClick: function(control) {
                 if (selected_point_marker && !selected_point_marker.isTooltipOpen()) {
@@ -292,7 +296,7 @@ fetch(data_fl)
                 if (selected_dark_line && !selected_dark_line.isTooltipOpen()) {
                     selected_dark_line.openTooltip();
                 }
-                control.state("close-tooltips");
+                control.state("tooltips-on");
             }
         }]
     }).addTo(map);
