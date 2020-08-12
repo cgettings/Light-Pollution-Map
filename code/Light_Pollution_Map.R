@@ -90,7 +90,8 @@ luminance_in_state <-
         luminance, 
         state_border$geometry %>% st_combine(), 
         sparse = FALSE, 
-        as_points = FALSE
+        # as_points = FALSE
+        as_points = TRUE
     ) %>% 
     as.logical()
 
@@ -164,6 +165,7 @@ registerPlugin <-
         map
     }
 
+
 fa_dir <- path(path_home(), "node_modules/@fortawesome/fontawesome-free")
 
 fa_plugin <-
@@ -174,6 +176,7 @@ fa_plugin <-
         stylesheet = "css/all.css",
         all_files = TRUE
     )
+
 
 geoblaze_dir <- path(path_home(), "node_modules/geoblaze")
 
@@ -186,6 +189,7 @@ geoblaze_plugin <-
         all_files = FALSE
     )
 
+
 ExtraMarkers_dir <- path(path_home_r(), "R", "Leaflet.ExtraMarkers")
 
 ExtraMarkers_plugin <-
@@ -197,6 +201,20 @@ ExtraMarkers_plugin <-
         script = "js/leaflet.extra-markers.min.js",
         all_files = TRUE
     )
+
+
+slider_dir <- path(path_home_r(), "R", "leaflet-slider")
+
+slider_plugin <-
+    htmlDependency(
+        name = "leaflet-slider", 
+        version = 1,
+        src = c(file = slider_dir),
+        stylesheet = "leaflet-slider.css",
+        script = "leaflet-slider.js",
+        all_files = TRUE
+    )
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # modifications of {leaflet} functions
@@ -215,6 +233,7 @@ source("code/functions/addEasyButtonNoFaDeps.R")
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 closest_dark_place <- read_file(here("code/closest_dark_place.js"))
+
 
 #=========================================================================================#
 # Mapping
@@ -285,7 +304,7 @@ light_pollution_heatmap <-
         project = TRUE,
         group = "Sky Brightness",
         layerId = "raster",
-        resolution = 64,
+        resolution = 72,
         colorOptions =
             colorOptions(
                 palette = inferno(256, direction = -1),
@@ -309,7 +328,7 @@ light_pollution_heatmap <-
         x = sky_brightness,
         group = "Sky Brightness",
         position = "topright",
-        digits = 1,
+        digits = 2,
         type = "mousemove",
         prefix = "",
         project = TRUE
@@ -340,6 +359,7 @@ light_pollution_heatmap <-
     registerPlugin(fa_plugin) %>%
     registerPlugin(geoblaze_plugin) %>%
     registerPlugin(ExtraMarkers_plugin) %>%
+    registerPlugin(slider_plugin) %>%
     
     # adding specialty JavaScript to find closest dark place to click
     
