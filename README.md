@@ -31,7 +31,7 @@ These two points are then displayed on the map, with tooltips giving their prope
 
 **TODO:** Add options to:
 
-* Show more than 1 dark point
+* ~Show more than 1 dark point~
 * Show darkest point(s) within a specified radius of clicked point
 * Change magnitude difference between clicked point and dark points
 * Specify magnitude range of dark points
