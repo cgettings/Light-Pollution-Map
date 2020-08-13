@@ -90,8 +90,7 @@ luminance_in_state <-
         luminance, 
         state_border$geometry %>% st_combine(), 
         sparse = FALSE, 
-        # as_points = FALSE
-        as_points = TRUE
+        as_points = FALSE
     ) %>% 
     as.logical()
 
