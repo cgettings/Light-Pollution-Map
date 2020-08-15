@@ -2,7 +2,9 @@
 
 ## Overview
 
-This map shows the brightness<sup id="note1">[1](#footnote1)</sup> of the night sky from Maryland to Maine, constructed using [Leaflet](https://leafletjs.com/), mostly via the [`{leaflet}`](https://rstudio.github.io/leaflet/) package in R and its extension packages. My inspiration was the awesome [lightpollutionmap.info](https://www.lightpollutionmap.info/#zoom=6.90&lat=5302607&lon=-8417855&layers=B0FFFFFTFFFFFFFFF),<sup id="note2">[2](#footnote2)</sup> and my deep dislike of rainbow color palettes. Data were downloaded from [*Supplement to: The New World Atlas of Artificial Night Sky Brightness*](http://doi.org/10.5880/GFZ.1.4.2016.001).<sup id="note3">[3](#footnote3)</sup>
+This map shows the brightness<sup id="note1">[1](#footnote1)</sup> of the night sky from Maryland to Maine, constructed using [Leaflet](https://leafletjs.com/), mostly via the [`{leaflet}`](https://rstudio.github.io/leaflet/) package in R and its extension packages. Click anywhere on the map, and you'll get up to 10 of the closest locations that are at least 1 mag/arcsec^2 darker than the clicked point. 
+
+My inspiration was the awesome [lightpollutionmap.info](https://www.lightpollutionmap.info/#zoom=6.90&lat=5302607&lon=-8417855&layers=B0FFFFFTFFFFFFFFF),<sup id="note2">[2](#footnote2)</sup> and my deep dislike of rainbow color palettes. Data were downloaded from [*Supplement to: The New World Atlas of Artificial Night Sky Brightness*](http://doi.org/10.5880/GFZ.1.4.2016.001).<sup id="note3">[3](#footnote3)</sup>
 
 The map is available at: https://cgettings.github.io/Light-Pollution-Map/
 
@@ -23,9 +25,9 @@ I created the map using `{leaflet}`, with a custom tile layer drawn from the "US
 
 This [custom JavaScript](/code/closest_dark_place.js) code re-reads the raster data from the `document` object using `fetch`, then uses the `georaster` package (already loaded thanks to `leafem::addGeoRaster()`) to parse the data. (This is necessary because the raster data object created by `leafem::addGeoRaster()` only exists within the scope of the function call that adds the georaster layer.) The script then uses the [`geoblaze` package](https://github.com/GeoTIFF/geoblaze) to extract the raster value from where the map was clicked. 
 
-Using that value, the script finds all points in the raw raster data that are between 1 and 1.75<sup id="note4">[4](#footnote4)</sup> mags darker than the clicked point. It then uses Leaflet's built-in `distanceTo` function to compute the distance between the clicked point and the filtered dark points, and finally selects the closest one.
+Using that value, the script finds all points in the raw raster data that are between 1 and 1.75<sup id="note4">[4](#footnote4)</sup> mags darker than the clicked point. It then uses Leaflet's built-in `distanceTo` function to compute the distance between the clicked point and the filtered dark points, and finally selects the closest one (the default), and as many as 10, using the [`slider` plugin](https://github.com/Eclipse1979/leaflet-slider) for Leaflet.
 
-These two points are then displayed on the map, with tooltips giving their properties, and a line that gives the distance between them. The script then sends the unformatted property values to the console.
+These points are then displayed on the map, with tooltips giving their brightness, distance, and coordinates.
 
 ---
 
