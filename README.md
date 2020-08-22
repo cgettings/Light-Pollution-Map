@@ -2,7 +2,7 @@
 
 ## Overview
 
-This map shows the brightness<sup id="note1">[1](#footnote1)</sup> of the night sky from Maryland to Maine, constructed using [Leaflet](https://leafletjs.com/), mostly via the [`{leaflet}`](https://rstudio.github.io/leaflet/) package in R and its extension packages. Click anywhere on the map, and you'll get up to 10 of the closest locations that are at least 1 mag/arcsec^2 darker than the clicked point. 
+This map shows the brightness<sup id="note1">[1](#footnote1)</sup> of the night sky from Maryland to Maine, constructed using [Leaflet](https://leafletjs.com/), mostly via the [`{leaflet}`](https://rstudio.github.io/leaflet/) package in R and its extension packages. Click anywhere on the map, and you'll get (by default) the closest single point that is at least 1 mag/arcsec^2 darker than the clicked point. You can use the "dark point properties" control to change: the number of dark points, their magnitude difference from the clicked point, and their maximum distance away.
 
 My inspiration was the awesome [lightpollutionmap.info](https://www.lightpollutionmap.info/#zoom=6.90&lat=5302607&lon=-8417855&layers=B0FFFFFTFFFFFFFFF),<sup id="note2">[2](#footnote2)</sup> and my deep dislike of rainbow color palettes. Data were downloaded from [*Supplement to: The New World Atlas of Artificial Night Sky Brightness*](http://doi.org/10.5880/GFZ.1.4.2016.001).<sup id="note3">[3](#footnote3)</sup>
 
@@ -25,7 +25,11 @@ I created the map using `{leaflet}`, with a custom tile layer drawn from the "US
 
 This [custom JavaScript](/code/closest_dark_place.js) code re-reads the raster data from the `document` object using `fetch`, then uses the `georaster` package (already loaded thanks to `leafem::addGeoRaster()`) to parse the data. (This is necessary because the raster data object created by `leafem::addGeoRaster()` only exists within the scope of the function call that adds the georaster layer.) The script then uses the [`geoblaze` package](https://github.com/GeoTIFF/geoblaze) to extract the raster value from where the map was clicked. 
 
-Using that value, the script finds all points in the raw raster data that are between 1 and 1.75<sup id="note4">[4](#footnote4)</sup> mags darker than the clicked point. It then uses Leaflet's built-in `distanceTo` function to compute the distance between the clicked point and the filtered dark points, and finally selects the closest one (the default), and as many as 10, using the [`slider` plugin](https://github.com/Eclipse1979/leaflet-slider) for Leaflet.
+Using that value, the script by default finds all points in the raw raster data that are between 1 and 1.75<sup id="note4">[4](#footnote4)</sup> mags darker than the clicked point. 
+
+Using the custom control, the user can change this value, and even find points that are brighter (i.e., negative values). The control's values are read from the DOM on the "click" event, or on the "update" event, which is fired by clicking on the control's "update" button.
+
+The script then uses Leaflet's built-in `distanceTo` function to compute the distance between the clicked point and the filtered dark points, and finally selects the closest single point (the default), or as many as the user specifies, potentially within a specified maximum distance.
 
 These points are then displayed on the map, with tooltips giving their brightness, distance, and coordinates.
 
@@ -34,9 +38,9 @@ These points are then displayed on the map, with tooltips giving their brightnes
 **TODO:** Add options to:
 
 * ~Show more than 1 dark point~
-* Show darkest point(s) within a specified radius of clicked point
-* Change magnitude difference between clicked point and dark points
-* Specify magnitude range of dark points
+* ~Show darkest point(s) within a specified radius of clicked point~
+* ~Change magnitude difference between clicked point and dark points~
+* Specify magnitude range of dark points (?? - *last item may be more useful*)
 * Find dark points where specified celestial objects are visible<sup id="note4">[5](#footnote5)</sup>
 
 ---
