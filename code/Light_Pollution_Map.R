@@ -42,11 +42,7 @@ library(fs)
 
 state_bbox <- 
     read_csv(here("data/US_State_Bounding_Boxes.csv")) %>% 
-    filter(STUSPS %in% c("NY", "CT", "NH", "VT", "MA", "ME", "RI", "PA", "NJ", "MD", "DE")) %>%
-    mutate(
-        map_center_x = rowMeans(select(., xmin, xmax)),
-        map_center_y = rowMeans(select(., ymin, ymax))
-    )
+    filter(STUSPS %in% c("NY", "CT", "NH", "VT", "MA", "ME", "RI", "PA", "NJ", "MD", "DE"))
 
 state_extent <- 
     with(
@@ -91,6 +87,7 @@ luminance_in_state <-
         state_border$geometry %>% st_combine(), 
         sparse = FALSE, 
         as_points = FALSE
+        # as_points = TRUE
     ) %>% 
     as.logical()
 
@@ -164,6 +161,7 @@ registerPlugin <-
         map
     }
 
+# my own FA library
 
 fa_dir <- path(path_home(), "node_modules/@fortawesome/fontawesome-free")
 
@@ -177,6 +175,8 @@ fa_plugin <-
     )
 
 
+# geoblaze raster computation
+
 geoblaze_dir <- path(path_home(), "node_modules/geoblaze")
 
 geoblaze_plugin <-
@@ -188,6 +188,8 @@ geoblaze_plugin <-
         all_files = FALSE
     )
 
+
+# extramarkers
 
 ExtraMarkers_dir <- path(path_home_r(), "R", "Leaflet.ExtraMarkers")
 
@@ -202,19 +204,6 @@ ExtraMarkers_plugin <-
     )
 
 
-slider_dir <- path(path_home_r(), "R", "leaflet-slider")
-
-slider_plugin <-
-    htmlDependency(
-        name = "leaflet-slider", 
-        version = 1,
-        src = c(file = slider_dir),
-        stylesheet = "leaflet-slider.css",
-        script = "leaflet-slider.js",
-        all_files = TRUE
-    )
-
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # modifications of {leaflet} functions
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
@@ -223,15 +212,27 @@ slider_plugin <-
 
 source("code/functions/addResetMapButtonPosition.R")
 
-# `addEasyButton` from {leaflet}, but removing fontawesome dependency (so I can use it from node)
+# `addEasyButton` from {leaflet}, but removing fontawesome dependency (so I can use the current 
+#   version from node repo)
 
 source("code/functions/addEasyButtonNoFaDeps.R")
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# Custom JavaScript for `onRender`
+# Custom JavaScript and HTML for `onRender`
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
-closest_dark_place <- read_file(here("code/closest_dark_place.js"))
+closest_dark_place_js <- read_file(here("code/js/closest_dark_place.js"))
+dark_point_control    <- read_file(here("code/html/dark_point_control.html"))
+
+
+# Replacing "####" in JavaScript with HTML
+
+closest_dark_place <- 
+    str_replace(
+        closest_dark_place_js, 
+        "####",
+        dark_point_control
+    )
 
 
 #=========================================================================================#
@@ -358,7 +359,6 @@ light_pollution_heatmap <-
     registerPlugin(fa_plugin) %>%
     registerPlugin(geoblaze_plugin) %>%
     registerPlugin(ExtraMarkers_plugin) %>%
-    registerPlugin(slider_plugin) %>%
     
     # adding specialty JavaScript to find closest dark place to click
     
@@ -380,7 +380,7 @@ saveWidget(
     widget = light_pollution_heatmap,
     file = here("plots", "light_pollution_heatmap_georaster.html"),
     selfcontained = TRUE,
-    title = "Light Pollution Heat Map, from Maryland to Maine"
+    title = "Light Pollution Heat Map for the Northeast US"
 )
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
