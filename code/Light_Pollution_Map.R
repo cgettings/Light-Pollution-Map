@@ -87,7 +87,6 @@ luminance_in_state <-
         state_border$geometry %>% st_combine(), 
         sparse = FALSE, 
         as_points = FALSE
-        # as_points = TRUE
     ) %>% 
     as.logical()
 
@@ -115,14 +114,18 @@ sky_brightness <-
     
     mutate(
         
-        # replacing 0's with tiny value, so log10 will not give -Inf
+        # adding 0.171168465 to each value. ensuring that a luminance of 0 produces 
+        #   sky_brightness of 22.0 (which is considered the darkest a dark sky gets), 
+        #   and also keeps `log10()` happy
+        # 
+        # This replicates the procedure done by lightpollution.info when displaying
+        #   luminance values
         
-        luminance_no0 = if_else(luminance == 0, 1e-08, luminance),
-        sky_brightness = (log10((luminance_no0/1000)/10.8e4))/-0.4
+        sky_brightness = (log10(((luminance+0.171168465)/1000)/10.8e4))/-0.4
         
     ) %>% 
     
-    select(-luminance, -luminance_no0) %>% 
+    select(-luminance) %>%
     
     # transforming to stars object, to make adding to leaflet easier
     
@@ -308,6 +311,20 @@ light_pollution_heatmap <-
         colorOptions =
             colorOptions(
                 palette = inferno(256, direction = -1),
+                
+                # modifying breaks to get a better mapping of visual differences to
+                #   photometric categories
+                # 
+                # 16 = 2^4, so need 4 `sqrt()` calls to reverse:
+                
+                breaks = 
+                    sqrt(sqrt(sqrt(sqrt(
+                        seq(
+                            min(sky_brightness$sky_brightness, na.rm = TRUE)^16, 
+                            max(sky_brightness$sky_brightness, na.rm = TRUE)^16, 
+                            length.out = 256
+                        )
+                    )))),
                 na.color = "#00000000"
             ),
         options = tileOptions(zIndex = 1000)
