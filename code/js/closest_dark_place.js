@@ -182,12 +182,6 @@ function dark_point_function(e) {
         
         for (var k = 0; k < dark_points.length; k++) {
             
-            // sending dark point info to console
-            
-            k1 = k + 1;
-            
-            console.log(k1 + ":", dark_points[k]);
-            
             // adding a marker at the darkest point(s)
             
             map.layerManager.addLayer(
@@ -197,14 +191,22 @@ function dark_point_function(e) {
                     {"icon": dark_point_icon})
                     .bindTooltip(
                         
-                        "<span style='font-family:sans-serif;font-size:130%;font-weight:bold'>" + 
-                        k1 + ": " + "mag = " + dark_points[k].grid_point.alt.toFixed(2) + 
+                        "<span style='font-family:sans-serif;font-size:120%;font-weight:bold;'>" + 
+                        "mag = " + dark_points[k].grid_point.alt.toFixed(2) + 
                         "</span>" + 
+                        
                         "<br>" +
                         
-                        "<span style='font-family:monospace;font-size:115%;font-weight:bold'>" + 
+                        "<span style='font-family:sans-serif;font-size:115%;font-weight:bold;'>" + 
+                        "point: " + dark_points[k].point + 
+                        "</span>" +
+                        
+                        "<br>" +
+                        
+                        "<span style='font-family:sans-serif;font-size:115%;'>" + 
                         (dark_points[k].distance/1000).toFixed(1) + " km" + 
                         "</span>" +
+                        
                         "<br>" +
                         
                         "<span style='font-family:monospace;font-size:115%;'>" + 
@@ -219,6 +221,11 @@ function dark_point_function(e) {
                 'marker', k, 'dark_points');
         
         }
+        
+        
+        // sending dark point info to console
+        
+        console.log("dark_points:", dark_points);
         
         // opening all tooltips
         
@@ -334,9 +341,10 @@ fetch(data_fl)
                         .addTo(map)
                         .bindTooltip(
                             
-                            "<span style='font-family:sans-serif;font-size:130%;font-weight:bold'>" + 
-                            "mag: " + selected_brightness.toFixed(2) + 
+                            "<span style='font-family:sans-serif;font-size:120%;font-weight:bold;'>" + 
+                            "mag = " + selected_brightness.toFixed(2) + 
                             "</span>" + 
+                            
                             "<br>" +
                             
                             "<span style='font-family:monospace;font-size:115%;'>" + 
