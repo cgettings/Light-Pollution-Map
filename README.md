@@ -57,7 +57,7 @@ These points are then displayed on the map, with tooltips giving their brightnes
 ---
 
 <a name="footnote1">1.</a> Sky brightness values are in `mag/arcsec^2`. Explanation [here](https://en.wikipedia.org/wiki/Surface_brightness). [↩](#note1)<br>
-<a name="footnote2">2.</a> In practical terms, this means that you could e.g. find locations where a 2-second exposure had the same background sky brightness as a 1-second exposure at your original location. [↩](#note2)<br>
+<a name="footnote2">2.</a> In practical terms, this means that you could e.g. find locations where a 2-second camera exposure had the same background sky brightness as a 1-second exposure at your original location. [↩](#note2)<br>
 <a name="footnote3">3.</a> Shout out to [Dan Jentzen](https://www.brighterboston.org/staff) for introducing me to this website. [↩](#note3)<br>
 <a name="footnote4">4.</a> Falchi, Fabio; Cinzano, Pierantonio; Duriscoe, Dan; Kyba, Christopher C. M.; Elvidge, Christopher D.; Baugh, Kimberly; Portnov, Boris; Rybnikova, Nataliya A.; Furgoni, Riccardo (2016): Supplement to: The New World Atlas of Artificial Night Sky Brightness. V. 1.1. GFZ Data Services. http://doi.org/10.5880/GFZ.1.4.2016.001 <br>
 Falchi F, Cinzano P, Duriscoe D, Kyba CC, Elvidge CD, Baugh K, Portnov BA, Rybnikova NA, Furgoni R. The new world atlas of artificial night sky brightness. Science Advances. 2016 Jun 1;2(6). http://dx.doi.org/10.1126/sciadv.1600377[↩](#note4) <br>
