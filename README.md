@@ -4,7 +4,7 @@
 
 This map shows the brightness<sup id="note1">[1](#footnote1)</sup> of the night sky from Maryland to Maine, constructed using [Leaflet](https://leafletjs.com/), mostly via the [`{leaflet}`](https://rstudio.github.io/leaflet/) package in R and its extension packages. Click anywhere on the map, and you'll get (by default) the closest single point that is at least 1 [Exposure Value (EV)](https://en.wikipedia.org/wiki/Exposure_value#EV_as_a_measure_of_luminance_and_illuminance) darker than the clicked point.<sup id="note2">[2](#footnote2)</sup> You can use the "dark point properties" control to change: the number of dark points, their EV difference from the clicked point, and their maximum distance away.
 
-My inspiration was the awesome [lightpollutionmap.info](https://www.lightpollutionmap.info/#zoom=5.34&lat=5329996&lon=-8358608&layers=B0FFFFFTFFFFFFFFF),<sup id="note3">[3](#footnote3)</sup>, my deep dislike of rainbow color palettes, and my desire to take some good star photos in the Catskills. Data were downloaded from [*Supplement to: The New World Atlas of Artificial Night Sky Brightness*](http://doi.org/10.5880/GFZ.1.4.2016.001).<sup id="note4">[4](#footnote4)</sup>
+My inspiration was the awesome [lightpollutionmap.info](https://www.lightpollutionmap.info/#zoom=5.34&lat=5329996&lon=-8358608&layers=B0FFFFFTFFFFFFFFF),<sup id="note3">[3](#footnote3)</sup> my deep dislike of rainbow color palettes, and my desire to take some good star photos in the Catskills. Data were downloaded from [*Supplement to: The New World Atlas of Artificial Night Sky Brightness*](http://doi.org/10.5880/GFZ.1.4.2016.001).<sup id="note4">[4](#footnote4)</sup>
 
 The map is available at: https://cgettings.github.io/Light-Pollution-Map/
 
