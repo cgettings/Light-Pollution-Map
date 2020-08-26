@@ -35,13 +35,12 @@ This [custom JavaScript](/code/closest_dark_place.js) uses the raster data I pas
 
 First, the script converts the raw raster data to `LatLng` points, with the magnitude value saved as the `alt[itude]` property. It then re-reads the raster layer data from the `DOM` using `fetch`, then uses the `georaster` package (already loaded thanks to `leafem::addGeoRaster()`) to parse the data.<sup id="note6">[6](#footnote6)</sup> The script then uses the [`geoblaze` package](https://github.com/GeoTIFF/geoblaze) to extract the magnitude value from where the raster was clicked.
 
-Using that value, the script by default finds all points in the raw raster data that are between 1 and 2<sup id="note7">[7](#footnote7)</sup> EVs darker than the clicked point. 
+Using that value, the script by default finds all points in the raw raster data that are between 1 and 2<sup id="note7">[7](#footnote7)</sup> EVs darker than the clicked point. The script then uses Leaflet's built-in `distanceTo` function to compute the distance between the clicked point and the filtered dark points, and finally selects the closest single point. 
 
-Using the custom control, the user can change this value, and even find points that are brighter (i.e., negative values). The control's values are read from the DOM on the "click" event, or on the "update" event, which is fired by clicking on the control's "update" button.
+The final dark points are then displayed on the map, with tooltips giving their brightness, distance, and coordinates; the unformatted values are also sent to the console (accessible via "Developer tools" in a web browser) as `LatLng` objects.
 
-The script then uses Leaflet's built-in `distanceTo` function to compute the distance between the clicked point and the filtered dark points, and finally selects the closest single point (the default), or as many as the user specifies, potentially within a specified maximum distance.
+Using the custom control, the user can change the number of dark points returned, the EV difference between the clicked and dark points (including negative difference values, which represent *brighter* points), and the maximum distance between the clicked and dark points. These user-specified control values are read from the DOM on the "click" event (fired by clicking on the map), and on the "update" event (fired by clicking on the control's "update" button).
 
-These points are then displayed on the map, with tooltips giving their brightness, distance, and coordinates; the unformatted values are also sent to the console (accessible via "Developer tools" in a web browser) as `LatLng` objects.
 
 ---
 
