@@ -25,7 +25,7 @@ I created the map using `{leaflet}`, with a custom tile layer drawn from the "US
 
 This [custom JavaScript](/code/closest_dark_place.js) code re-reads the raster data from the `document` object using `fetch`, then uses the `georaster` package (already loaded thanks to `leafem::addGeoRaster()`) to parse the data. (This is necessary because the raster data object created by `leafem::addGeoRaster()` only exists within the scope of the function call that adds the georaster layer.) The script then uses the [`geoblaze` package](https://github.com/GeoTIFF/geoblaze) to extract the raster value from where the map was clicked. 
 
-Using that value, the script by default finds all points in the raw raster data that are between 1 and 1.75<sup id="note5">[5](#footnote5)</sup> EVs darker than the clicked point. 
+Using that value, the script by default finds all points in the raw raster data that are between 1 and 2<sup id="note5">[5](#footnote5)</sup> EVs darker than the clicked point. 
 
 Using the custom control, the user can change this value, and even find points that are brighter (i.e., negative values). The control's values are read from the DOM on the "click" event, or on the "update" event, which is fired by clicking on the control's "update" button.
 
@@ -49,5 +49,5 @@ These points are then displayed on the map, with tooltips giving their brightnes
 <a name="footnote3">3.</a> Shout out to [Dan Jentzen](https://www.brighterboston.org/staff) for introducing me. [↩](#note3)<br>
 <a name="footnote4">4.</a> Falchi, Fabio; Cinzano, Pierantonio; Duriscoe, Dan; Kyba, Christopher C. M.; Elvidge, Christopher D.; Baugh, Kimberly; Portnov, Boris; Rybnikova, Nataliya A.; Furgoni, Riccardo (2016): Supplement to: The New World Atlas of Artificial Night Sky Brightness. V. 1.1. GFZ Data Services. http://doi.org/10.5880/GFZ.1.4.2016.001 <br>
 Falchi F, Cinzano P, Duriscoe D, Kyba CC, Elvidge CD, Baugh K, Portnov BA, Rybnikova NA, Furgoni R. The new world atlas of artificial night sky brightness. Science Advances. 2016 Jun 1;2(6). http://dx.doi.org/10.1126/sciadv.1600377[↩](#note4) <br>
-<a name="footnote5">5.</a> An arbitrary cutoff that reduces processing demands. [↩](#note5)<br>
+<a name="footnote5">5.</a> A mostly arbitrary cutoff that reduces processing demands. [↩](#note5)<br>
 <a name="footnote6">6.</a> More information available [here](https://en.wikipedia.org/wiki/Naked_eye#In_astronomy). [↩](#note6)<br>
