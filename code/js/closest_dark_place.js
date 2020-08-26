@@ -51,15 +51,36 @@ for (var i = 0; i < data.x.length; i++) {
 // dark point functions
 //=============================================================================//
     
-// creating a function that will filter brightness values
+// creating a function that will filter brightness values:
+//
+//  1 EV == 0.752575 mags (with K = 12.5), so I take however many EV's the
+//  user wants the difference to be, and convert that into mags by multiplying
+//  by 0.752575.
+//
+//  Returning all points that meet the threshold could return 10's of thousands of 
+//  points, so to reduce proccessing overhead at the distance calculation step, 
+//  I reduce the number of points by imposing a range of EV difference to return. 
+//  It's very unlikely that the closest point will be +2 EVs away when there are points
+//  that are +1 EV away, so I've made +2 EVs the top of the range. 
+//
+//  This is the subset of points that the script will search through to find the
+//  closest point(s)
+
 
 function grid_coords_filter_fun (grid_coords) {
     
-    return grid_coords.alt >= (selected_brightness + magnitude_value) && 
-            grid_coords.alt <= (selected_brightness + magnitude_value + 0.75);
+    return grid_coords.alt >= 
+            (selected_brightness + 
+                (exposure_value * 0.752575)) && 
+        
+           grid_coords.alt <= 
+            (selected_brightness + 
+                (exposure_value * 0.752575) + (0.752575 * Math.sign(exposure_value))
+            );
     
 }
-    
+
+
 // creating a function that will add dark points
 
 function dark_point_function(e) {
@@ -74,23 +95,20 @@ function dark_point_function(e) {
         document.getElementById('distance').value : 
         Infinity;
     
-    magnitude_value = 
-        document.getElementById('magnitude').value !== '' ? 
-        document.getElementById('magnitude').value : 
+    exposure_value = 
+        document.getElementById('exposure').value !== '' ? 
+        document.getElementById('exposure').value : 
         1;     
 
     num_points_value = Number(num_points_value);
-    distance_value = Number(distance_value);
-    magnitude_value = Number(magnitude_value);
-    
-    console.log('num_points_value [function]:', num_points_value);
-    console.log('distance_value [function]:', distance_value);
-    console.log('magnitude_value [function]:', magnitude_value);
+    distance_value   = Number(distance_value);
+    exposure_value   = Number(exposure_value);
     
     
     // applying the filtering function to the data
     
     grid_coords_filtered = grid_coords.filter(grid_coords_filter_fun);
+    
     
     //------------------------------------------------------------------------------//
     // distance calculations
@@ -99,7 +117,6 @@ function dark_point_function(e) {
     // creating variables for computed distances
     
     results = [];
-    //distance = [];
     
     // looping through all filtered points to get the distance values (`push` appends an array)
     
@@ -119,18 +136,18 @@ function dark_point_function(e) {
     results.sort(function(a, b) { return a.distance - b.distance });
     
     
+    // filtering to get those within the requested distance
+    
     results_filtered = [];
     
     results_filtered = results.filter(results => results.distance <= distance_value);
     
     
     //------------------------------------------------------------------------------//
-    // adding controls for # of points returned, distance to points, magnitude diff
+    // adding controls for # of points returned, distance to points, exposure diff
     //------------------------------------------------------------------------------//
     
     // pulling out the top [x] values
-    
-    //dark_points = [];
     
     dark_points = results.slice(0, num_points_value);
     
@@ -138,7 +155,6 @@ function dark_point_function(e) {
     // if there is no darker point than the one clicked, don't do anything
     
     if (typeof dark_points !== "undefined") {
-        
         
         //------------------------------------------------------------------------------//
         // adding "dark points" markers
@@ -166,6 +182,12 @@ function dark_point_function(e) {
         
         for (var k = 0; k < dark_points.length; k++) {
             
+            // sending dark point info to console
+            
+            k1 = k + 1;
+            
+            console.log(k1 + ":", dark_points[k]);
+            
             // adding a marker at the darkest point(s)
             
             map.layerManager.addLayer(
@@ -176,7 +198,7 @@ function dark_point_function(e) {
                     .bindTooltip(
                         
                         "<span style='font-family:sans-serif;font-size:130%;font-weight:bold'>" + 
-                        "mag: " + dark_points[k].grid_point.alt.toFixed(2) + 
+                        k1 + ": " + "mag = " + dark_points[k].grid_point.alt.toFixed(2) + 
                         "</span>" + 
                         "<br>" +
                         
@@ -228,7 +250,7 @@ function dark_point_function(e) {
 //=============================================================================//
 
 // getting raster data from document via href, to identify the brightness value at the click point
-//  (originally provided through `leafem::addGeoRaster`)
+//      (originally provided through `leafem::addGeoRaster`)
 
 var data_fl = document.getElementById("raster" + "-1-attachment").href;
 
@@ -481,3 +503,6 @@ fetch(data_fl)
     });
 
 });
+
+
+// --------------------------------- THIS IS THE END! --------------------------------- //

@@ -307,7 +307,7 @@ light_pollution_heatmap <-
         project = TRUE,
         group = "Sky Brightness",
         layerId = "raster",
-        resolution = 72,
+        resolution = 64,
         colorOptions =
             colorOptions(
                 palette = inferno(256, direction = -1),
