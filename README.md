@@ -41,6 +41,7 @@ These points are then displayed on the map, with tooltips giving their brightnes
 * ~Show darkest point(s) within a specified radius of clicked point~
 * ~Change magnitude difference between clicked point and dark points~
 * Find dark points where specified celestial objects are visible<sup id="note6">[6](#footnote6)</sup>
+* Add explanation re: heat map color gradient
 
 ---
 
