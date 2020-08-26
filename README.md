@@ -8,6 +8,7 @@ My inspiration was the awesome [lightpollutionmap.info](https://www.lightpolluti
 
 The map is available at: https://cgettings.github.io/Light-Pollution-Map/
 
+## Screenshot
 [![Screenshot of map](map_screenshot.png)](map_screenshot.png)
 
 ## Code
@@ -17,13 +18,15 @@ The map is available at: https://cgettings.github.io/Light-Pollution-Map/
 
 ### Data processing
 
-The sky brightness data comes from a whole-world geotiff file of simulated zenith radiance data, given in `mcd/m^2`. After reading the file into R using `raster::raster()`, I cropped it using a bounding box encompassing all of the states displayed (reducing the amount of data that would eventually be read into RAM), and then converted the raster into a `stars` object. This allowed me to use `{sf}` methods to further crop the raster using state boundary data from the [`{tigris}`](https://github.com/walkerke/tigris) package. Finally, I converted the `stars` raster into a `tibble`, converted `mcd/m^2` into `mag/arcsec^2`, and then turned the tibble back into a `stars` object for mapping.
+The sky brightness data comes from a whole-world geotiff file of simulated zenith radiance data, given in `mcd/m^2`. I read the file into R as a `RasterLayer` using `raster::raster()`, which avoids loading the whole 2.8 GB file into memory. I then crop it using a bounding box encompassing the states I'm displaying, and then convert the cropped raster into a [`stars` object](https://r-spatial.github.io/stars/), which loads it into memory. This allows me to use `{sf}` methods to further crop the raster using state boundary data from the [`{tigris}` package](https://github.com/walkerke/tigris). Finally, I convert the `stars` object into a `tbl`, convert luminance (`mcd/m^2`) to magnitude (`mag/arcsec^2`), and then turn the tibble back into a `stars` object for mapping.
 
 ### Mapping
 
-I created the map using `{leaflet}`, with a custom tile layer drawn from the "USA_Topo_Maps" esri tile layer hosted on [ArcGIS online](https://services.arcgisonline.com/ArcGIS/rest/services/USA_Topo_Maps/MapServer/). I added the `stars` raster to the map using `leafem::addGeoRaster()`, with the mousover values created using `leafem::addImageQuery()`, and the OSM search using `leaflet.extras::addSearchOSM()`. The map view reset botton is a modification of `leaflet.extras::addResetMapButton()` which simply adds a `position` argument to the `easyButton()` call. Finally, I added map dependencies using the [`registerPlugin`](http://rstudio.github.io/leaflet/extending.html) and `leaflet.extras::addAwesomeMarkersDependencies()` function, and then passed to `htmlwidgets::onRender()` my custom JavaScript and a `tbl` of raw raster data.
+I create the map using `{leaflet}` and `addProviderTiles()`, with a custom tile layer drawn from the "USA_Topo_Maps" esri tile layer hosted on [ArcGIS online](https://services.arcgisonline.com/ArcGIS/rest/services/USA_Topo_Maps/MapServer/). I add the `stars` raster to the map using `leafem::addGeoRaster()`, with the mousover values created using `leafem::addImageQuery()`, and the OSM search using `leaflet.extras::addSearchOSM()`. The map view reset botton is a modification of `leaflet.extras::addResetMapButton()` which simply adds a `position` argument to the `easyButton()` call. Finally, I add map dependencies using the [`registerPlugin`](http://rstudio.github.io/leaflet/extending.html) and `leaflet.extras::addAwesomeMarkersDependencies()` functions, and then pass my custom JavaScript and a `tbl` of raw raster data to `htmlwidgets::onRender()`.
 
-This [custom JavaScript](/code/closest_dark_place.js) code re-reads the raster data from the `document` object using `fetch`, then uses the `georaster` package (already loaded thanks to `leafem::addGeoRaster()`) to parse the data. (This is necessary because the raster data object created by `leafem::addGeoRaster()` only exists within the scope of the function call that adds the georaster layer.) The script then uses the [`geoblaze` package](https://github.com/GeoTIFF/geoblaze) to extract the raster value from where the map was clicked. 
+This [custom JavaScript](/code/closest_dark_place.js) uses the raster data I passed to `htmlwidgets::onRender()`, and the already-rendered map layer, and finds dark points.
+
+First, the script converts the raw raster data to `LatLng` points, with the magnitude value saved as the `alt[itude]` property. It then re-reads the raster layer data from the `DOM` using `fetch`, then uses the `georaster` package (already loaded thanks to `leafem::addGeoRaster()`) to parse the data. (This is necessary because the raster data object created by `leafem::addGeoRaster()` only exists within the scope of the function call that adds the georaster layer.) The script then uses the [`geoblaze` package](https://github.com/GeoTIFF/geoblaze) to extract the magnitude value from where the raster was clicked.
 
 Using that value, the script by default finds all points in the raw raster data that are between 1 and 2<sup id="note5">[5](#footnote5)</sup> EVs darker than the clicked point. 
 
@@ -31,7 +34,7 @@ Using the custom control, the user can change this value, and even find points t
 
 The script then uses Leaflet's built-in `distanceTo` function to compute the distance between the clicked point and the filtered dark points, and finally selects the closest single point (the default), or as many as the user specifies, potentially within a specified maximum distance.
 
-These points are then displayed on the map, with tooltips giving their brightness, distance, and coordinates; the un-rounded values are also sent to the console (accessible via "Developer tools" in a web browser).
+These points are then displayed on the map, with tooltips giving their brightness, distance, and coordinates; the unformatted values are also sent to the console (accessible via "Developer tools" in a web browser) as `LatLng` objects.
 
 ---
 
