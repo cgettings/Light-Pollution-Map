@@ -15,7 +15,7 @@ My inspiration was the awesome [lightpollutionmap.info](https://www.lightpolluti
 ## Code
 
 [R](/code/Light_Pollution_Map.R)<br>
-[JavaScript](/code/closest_dark_place.js)<br>
+[JavaScript](/code/js/closest_dark_place.js)<br>
 
 ### Data processing
 
@@ -31,7 +31,7 @@ I add the brightness mousover display using `leafem::addImageQuery()`, the OSM s
 
 #### JavaScript
 
-This [custom JavaScript](/code/closest_dark_place.js) uses the raster data I passed to `htmlwidgets::onRender()`, along with the already-rendered map layer, to find the dark points.
+This [custom JavaScript](/code/js/closest_dark_place.js) uses the raster data I passed to `htmlwidgets::onRender()`, along with the already-rendered map layer, to find the dark points.
 
 First, the script converts the raw raster data to `LatLng` points, with the magnitude value saved as the `alt[itude]` property. It then re-reads the raster layer data from the `DOM` using `fetch`, then uses the `georaster` package (already loaded thanks to `leafem::addGeoRaster()`) to parse the data.<sup id="note6">[6](#footnote6)</sup> The script then uses the [`geoblaze` package](https://github.com/GeoTIFF/geoblaze) to extract the magnitude value from where the raster was clicked.
 
