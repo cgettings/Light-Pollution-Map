@@ -57,10 +57,6 @@ for (var i = 0; i < data.x.length; i++) {
 
 function selected_point_function(latlng, georaster) {
     
-    //console.log(e);
-    //console.log(latlng);
-    //console.log(georaster);
-    
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
     // clearing map
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
@@ -225,7 +221,6 @@ function dark_point_function(e) {
     
     for (var j = 0; j < grid_coords_filtered.length; j++) {
         
-        //distance = grid_coords_filtered[j].distanceTo(e.latlng);
         distance = grid_coords_filtered[j].distanceTo(selected_point_loc);
         
         results.push({"point": j, "grid_point": grid_coords_filtered[j], "distance": distance});
@@ -405,9 +400,6 @@ fetch(data_fl)
             //---------------------------------------------------------------------------//
             // updating dark points on 'update' event
             //---------------------------------------------------------------------------//
-            
-            // this is nexted inside the "click" event handler function, because that's
-            //  the only way to expose the selected location tp the "update" event
             
             map.on('update', function (e) {
                                 
