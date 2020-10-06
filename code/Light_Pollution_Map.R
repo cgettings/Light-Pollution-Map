@@ -207,6 +207,18 @@ ExtraMarkers_plugin <-
     )
 
 
+# geocoder
+
+Geocoder_plugin <- 
+    htmlDependency(
+        name = "geocoder", 
+        version = 1,
+        src = list(href = "https://unpkg.com/leaflet-control-geocoder/dist"),
+        stylesheet = "Control.Geocoder.css",
+        script = "Control.Geocoder.js",
+        all_files = TRUE
+    )
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # modifications of {leaflet} functions
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
@@ -254,7 +266,10 @@ light_pollution_heatmap <-
         options = list(
             "duration" = 0.375,
             "zoomSnap" = 0.5,
-            "padding" = c(10, 10)
+            "padding" = c(10, 10),
+            "preferCanvas" = FALSE, 
+            "updateWhenZooming" = FALSE,
+            "updateWhenIdle" = TRUE
         )
     ) %>%
     
@@ -310,7 +325,7 @@ light_pollution_heatmap <-
         resolution = 64,
         colorOptions =
             colorOptions(
-                palette = inferno(256, direction = -1),
+                palette = inferno(64, direction = -1),
                 
                 # modifying breaks to get a better mapping of visual differences to
                 #   photometric categories
@@ -322,12 +337,17 @@ light_pollution_heatmap <-
                         seq(
                             min(sky_brightness$sky_brightness, na.rm = TRUE)^16, 
                             max(sky_brightness$sky_brightness, na.rm = TRUE)^16, 
-                            length.out = 256
+                            length.out = 64
                         )
                     )))),
                 na.color = "#00000000"
             ),
-        options = tileOptions(zIndex = 1000)
+        options = 
+            tileOptions(
+                zIndex = 1000, 
+                updateWhenZooming = FALSE,
+                updateWhenIdle = TRUE
+            )
     ) %>%
     
     # adding controls
@@ -351,20 +371,6 @@ light_pollution_heatmap <-
         project = TRUE
     ) %>%
     
-    # allowing user to search for locations
-    
-    addSearchOSM(
-        options = 
-            searchFeaturesOptions(
-                zoom = 9, 
-                openPopup = TRUE, 
-                propertyName = "marker", 
-                autoType = FALSE,
-                position = "topleft",
-                hideMarkerOnCollapse = TRUE
-            )
-    ) %>% 
-    
     # reset buttons
     
     addResetMapButtonPosition(position = "bottomleft") %>%
@@ -376,6 +382,7 @@ light_pollution_heatmap <-
     registerPlugin(fa_plugin) %>%
     registerPlugin(geoblaze_plugin) %>%
     registerPlugin(ExtraMarkers_plugin) %>%
+    registerPlugin(Geocoder_plugin) %>%
     
     # adding specialty JavaScript to find closest dark place to click
     
@@ -387,7 +394,9 @@ light_pollution_heatmap <-
         ), 
         data = sky_brightness_coords
     )
+    
 
+light_pollution_heatmap
 
 #-----------------------------------------------------------------------------------------#
 # Saving map ----

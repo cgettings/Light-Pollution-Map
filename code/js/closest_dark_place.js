@@ -48,9 +48,94 @@ for (var i = 0; i < data.x.length; i++) {
 
 
 //=============================================================================//
-// dark point functions
+// custom functions
 //=============================================================================//
+
+//------------------------------------------------------------------------------//
+// selected point function
+//------------------------------------------------------------------------------//
+
+function selected_point_function(latlng, georaster) {
     
+    //console.log(e);
+    //console.log(latlng);
+    //console.log(georaster);
+    
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+    // clearing map
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+    
+    // if there are already markers on the map (because it's already been clicked), then
+    //  remove them before adding new ones on this click
+    
+    if (map.layerManager.getLayerGroup('selected_point')) map.layerManager.clearGroup('selected_point');
+    
+    
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+    // setting icon properties for awesome marker
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+    
+    selected_point_icon = 
+        L.ExtraMarkers.icon({
+            icon: "fa-bullseye",
+            iconColor: "#000000",
+            prefix: "fa",
+            markerColor: "#34FEF1",
+            shape: 'circle',
+            svg: true
+    });
+    
+    
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+    // getting the (interpolated) brightness value at the click point, in [lng, lat]
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+    
+    //  (it's an array, not a scalar, so you need to extract it with "[0]")
+    
+    selected_brightness = 
+        geoblaze.identify(
+            georaster, 
+            [latlng.lng, latlng.lat]
+        )[0];
+    
+    
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+    // adding "Selected point" marker
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+    
+    // adding a marker for the click point, and creating a Tooltip with details about the click point
+    //  (toFixed(2) is how you round numbers to 2 decimal places)
+    
+    map.layerManager.addLayer(
+    
+        L.marker(latlng, {"icon": selected_point_icon})
+            .addTo(map)
+            .bindTooltip(
+                
+                "<span style='font-family:sans-serif;font-size:120%;font-weight:bold;'>" + 
+                "mag = " + selected_brightness.toFixed(2) + 
+                "</span>" + 
+                
+                "<br>" +
+                
+                "<span style='font-family:monospace;font-size:115%;'>" + 
+                latlng.lat.toFixed(2) + ", " + 
+                latlng.lng.toFixed(2) +
+                "</span>", 
+                
+                {offset: [0, 0], sticky: false, permanent: true, opacity: 0.9}
+                
+            ),
+                
+        'marker', 100, 'selected_point');
+    
+}
+
+    
+//------------------------------------------------------------------------------//
+// Function to filter grid coords
+//------------------------------------------------------------------------------//
+
 // creating a function that will filter brightness values:
 //
 //  1 EV == 0.752575 mags (with K = 12.5), so I take however many EV's the
@@ -80,10 +165,21 @@ function grid_coords_filter_fun (grid_coords) {
     
 }
 
-
-// creating a function that will add dark points
+    
+//------------------------------------------------------------------------------//
+// Function to add dark points
+//------------------------------------------------------------------------------//
 
 function dark_point_function(e) {
+    
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+    // getting value from controls (on click)
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+    
+    // This code will evaluate when the map is clicked, and when the "update" button is
+    //  pressed on the custom control (which fires an event called "update" specified
+    //  in the HTML)
+    
     
     num_points_value = 
         document.getElementById('num_points').value !== '' ? 
@@ -110,9 +206,14 @@ function dark_point_function(e) {
     grid_coords_filtered = grid_coords.filter(grid_coords_filter_fun);
     
     
-    //------------------------------------------------------------------------------//
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
     // distance calculations
-    //------------------------------------------------------------------------------//
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+    
+    // getting location of selected point
+    
+    selected_point_group = map.layerManager.getLayerGroup('selected_point');
+    selected_point_loc = Object.values(selected_point_group._layers)[0].getLatLng();
     
     // creating variables for computed distances
     
@@ -124,7 +225,8 @@ function dark_point_function(e) {
     
     for (var j = 0; j < grid_coords_filtered.length; j++) {
         
-        distance = grid_coords_filtered[j].distanceTo(e.latlng);
+        //distance = grid_coords_filtered[j].distanceTo(e.latlng);
+        distance = grid_coords_filtered[j].distanceTo(selected_point_loc);
         
         results.push({"point": j, "grid_point": grid_coords_filtered[j], "distance": distance});
         
@@ -143,9 +245,9 @@ function dark_point_function(e) {
     results_filtered = results.filter(results => results.distance <= distance_value);
     
     
-    //------------------------------------------------------------------------------//
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
     // adding controls for # of points returned, distance to points, exposure diff
-    //------------------------------------------------------------------------------//
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
     
     // pulling out the top [x] values
     
@@ -156,9 +258,9 @@ function dark_point_function(e) {
     
     if (typeof dark_points !== "undefined") {
         
-        //------------------------------------------------------------------------------//
+        //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
         // adding "dark points" markers
-        //------------------------------------------------------------------------------//
+        //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
         
         // formatting icon for dark point marker(s)
         
@@ -234,13 +336,12 @@ function dark_point_function(e) {
         
     }
     
-    selected_point_group = map.layerManager.getLayerGroup('selected_point');
     selected_point_group.eachLayer(layer => layer.openTooltip());
     
     
-    //---------------------------------------------------------------------------//
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
     // on first click, set view to encompass all points
-    //---------------------------------------------------------------------------//
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
     
     map.fitBounds(
         [
@@ -249,6 +350,7 @@ function dark_point_function(e) {
         ], 
         {"padding": [25, 25], "duration": 0.5, "zoomSnap": 0.5}
     );
+    
 }
 
 
@@ -284,231 +386,216 @@ fetch(data_fl)
             //  remove them when a new one is added
             
             
-            //=============================================================================//
-            // doing a bunch of stuff on click.
-            //=============================================================================//
+            //---------------------------------------------------------------------------//
+            // adding selected point and dark points on click
+            //---------------------------------------------------------------------------//
             
             //  the "on" function creates a click event, which creates an object (usually named "e") containing 
             //  all the information about that click event
             
             
-            map.on("click", function(e) {
+            map.on("click", function (e) {
                 
-                //------------------------------------------------------------------------------//
-                // clearing map
-                //------------------------------------------------------------------------------//
-                
-                // if there are already markers on the map (because it's already been clicked), then
-                //  remove them before adding new ones on this click
-                
-                if (map.layerManager.getLayerGroup('selected_point')) map.layerManager.clearGroup('selected_point');
-                if (map.layerManager.getLayerGroup('dark_points')) map.layerManager.clearGroup('dark_points');
-                
-                
-                //------------------------------------------------------------------------------//
-                // adding "Selected point" marker
-                //------------------------------------------------------------------------------//
-                
-                // setting icon properties for awesome marker
-                
-                selected_point_icon = 
-                    L.ExtraMarkers.icon({
-                        icon: "fa-bullseye",
-                        iconColor: "#000000",
-                        prefix: "fa",
-                        markerColor: "#34FEF1",
-                        shape: 'circle',
-                        svg: true
-                });            
-                
-                
-                // getting the (interpolated) brightness value at the click point, in [lng, lat] form
-                //  (it's an array, not a scalar, so you need to extract it with "[0]")
-                
-                selected_brightness = 
-                    geoblaze.identify(
-                        georaster, 
-                        [e.latlng.lng, e.latlng.lat]
-                    )[0];
-                
-                
-                // adding a marker for the click point, and creating a Tooltip with details about the click point
-                //  (toFixed(2) is how you round numbers to 2 decimal places)
-                
-                map.layerManager.addLayer(
-
-                    L.marker(e.latlng, {"icon": selected_point_icon})
-                        .addTo(map)
-                        .bindTooltip(
-                            
-                            "<span style='font-family:sans-serif;font-size:120%;font-weight:bold;'>" + 
-                            "mag = " + selected_brightness.toFixed(2) + 
-                            "</span>" + 
-                            
-                            "<br>" +
-                            
-                            "<span style='font-family:monospace;font-size:115%;'>" + 
-                            e.latlng.lat.toFixed(2) + ", " + 
-                            e.latlng.lng.toFixed(2) +
-                            "</span>", 
-                            
-                            {offset: [0, 0], sticky: false, permanent: true, opacity: 0.9}
-                            
-                        ),
-                            
-                    'marker', 100, 'selected_point');
-                
-                
-                //------------------------------------------------------------------------------//
-                // Specifying dark point properties, taken from custom control
-                //------------------------------------------------------------------------------//
-                
-                // This code will evaluate when the map is clicked, and when the "update" button is
-                //  pressed on the custom control (which fires an event called "update" specified
-                //  in the HTML)
-                
-                //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
-                // getting value from controls (on click)
-                //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
-                
+                selected_point_function(e.latlng, georaster);
+                dark_point_function(e);
+                    
+            });
+            
+            
+            //---------------------------------------------------------------------------//
+            // updating dark points on 'update' event
+            //---------------------------------------------------------------------------//
+            
+            // this is nexted inside the "click" event handler function, because that's
+            //  the only way to expose the selected location tp the "update" event
+            
+            map.on('update', function (e) {
+                                
                 dark_point_function(e);
                 
-                //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
-                // getting value from controls (on update)
-                //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
-                
-                map.on('update', function (ev) {
+            });
+            
+            
+            //---------------------------------------------------------------------------//
+            // adding selected point based on location finding easyButton
+            //---------------------------------------------------------------------------//
+            
+            L.easyButton({
+                    position: "topleft",
+                    states: [{
+                        title: "Location",
+                        icon: "fas fa-crosshairs",
+                        
+                        onClick: function(e) {
+                        
+                            map.locate();
+                            
+                            map.on(
+                                'locationfound', 
+                                function(e) {
+                                    selected_point_function(e.latlng, georaster);
+                                    dark_point_function(e);
+                                });
+                                
+                            map.on(
+                                'locationerror', 
+                                function(e) {
+                                    alert(e.message);
+                                });
+                        }
+                    }]
+            }).addTo(map);
+            
+            
+            //---------------------------------------------------------------------------//
+            // adding selected point based on OSM/Nominatim search
+            //---------------------------------------------------------------------------//
+            
+            L.Control.geocoder(
+                options = {
+                    position: 'topleft',
+                    showUniqueResult: false,
+                    defaultMarkGeocode: false
+                }
+            )
+            .on(
+                'markgeocode', 
+                function(e) {
                     
+                    console.log("selected search result:", e.geocode.properties);
+                    
+                    selected_point_function(e.geocode.center, georaster);
                     dark_point_function(e);
                     
-                });
-        });
-
-
-        //---------------------------------------------------------------------------//
-        // easyButton focus on dark points
-        //---------------------------------------------------------------------------//
-        
-        L.easyButton({
-            position: "bottomleft",
-            states: [{
-                
-                stateName: "all-zoom",
-                icon: "fas fa-star",
-                title: "Zoom to dark points",
-                
-                onClick: function(control) {
-                    
-                    if (map.layerManager.getLayerGroup('dark_points')) {
-                        
-                        map.fitBounds(
-                            map.layerManager.getLayerGroup('dark_points').getBounds(), 
-                            {"padding": [25, 25], "duration": 0.5, "zoomSnap": 0.5}
-                        )}
-                        
-                    control.state("dark-point-zoom");
-                    }
-            }, {
-                
-                stateName: "dark-point-zoom",
-                icon: "far fa-circle",
-                title: "Zoom to all points",
-                
-                onClick: function(control) {
-                    
-                    if (map.layerManager.getLayerGroup('dark_points') && 
-                        map.layerManager.getLayerGroup('selected_point')) {
-                        
-                        map.fitBounds(
-                            [
-                                map.layerManager.getLayerGroup('dark_points').getBounds(),
-                                map.layerManager.getLayerGroup('selected_point').getBounds()
-                            ], 
-                            {"padding": [25, 25], "duration": 0.5, "zoomSnap": 0.5}
-                        )}
-                        
-                    control.state("all-zoom");
-                    }
-            }]
-        }).addTo(map);
-        
-
-        //---------------------------------------------------------------------------//
-        // easyButton to clear the markers and lines
-        //---------------------------------------------------------------------------//
-        
-        L.easyButton({
+                }
+            )
+            .addTo(map);
+            
+            
+            //---------------------------------------------------------------------------//
+            // easyButton focus on dark points
+            //---------------------------------------------------------------------------//
+            
+            L.easyButton({
                 position: "bottomleft",
                 states: [{
-                    title: "Clear",
-                    icon: "fas fa-trash",
                     
-                    onClick: function() {
+                    stateName: "all-zoom",
+                    icon: "fas fa-star",
+                    title: "Zoom to dark points",
+                    
+                    onClick: function(control) {
                         
-                        if (map.layerManager.getLayerGroup('selected_point')) {
-                            map.layerManager.clearGroup('selected_point');
-                            
-                        }
                         if (map.layerManager.getLayerGroup('dark_points')) {
-                            map.layerManager.clearGroup('dark_points');
                             
+                            map.fitBounds(
+                                map.layerManager.getLayerGroup('dark_points').getBounds(), 
+                                {"padding": [25, 25], "duration": 0.5, "zoomSnap": 0.5}
+                            )}
+                            
+                        control.state("dark-point-zoom");
                         }
+                }, {
+                    
+                    stateName: "dark-point-zoom",
+                    icon: "far fa-circle",
+                    title: "Zoom to all points",
+                    
+                    onClick: function(control) {
+                        
+                        if (map.layerManager.getLayerGroup('dark_points') && 
+                            map.layerManager.getLayerGroup('selected_point')) {
+                            
+                            map.fitBounds(
+                                [
+                                    map.layerManager.getLayerGroup('dark_points').getBounds(),
+                                    map.layerManager.getLayerGroup('selected_point').getBounds()
+                                ], 
+                                {"padding": [25, 25], "duration": 0.5, "zoomSnap": 0.5}
+                            )}
+                            
+                        control.state("all-zoom");
+                        }
+                }]
+            }).addTo(map);
+            
+    
+            //---------------------------------------------------------------------------//
+            // easyButton to clear the markers and lines
+            //---------------------------------------------------------------------------//
+            
+            L.easyButton({
+                    position: "bottomleft",
+                    states: [{
+                        title: "Clear",
+                        icon: "fas fa-trash",
+                        
+                        onClick: function() {
+                            
+                            if (map.layerManager.getLayerGroup('selected_point')) {
+                                map.layerManager.clearGroup('selected_point');
+                                
+                            }
+                            if (map.layerManager.getLayerGroup('dark_points')) {
+                                map.layerManager.clearGroup('dark_points');
+                                
+                            }
+                        }
+                    }]
+            }).addTo(map);
+            
+            
+            //---------------------------------------------------------------------------//
+            // easyButton to toggle the tooltips
+            //---------------------------------------------------------------------------//
+            
+            L.easyButton({
+                position: "bottomleft",
+                states: [{
+                    
+                    stateName: "tooltips-on",
+                    icon: "fa-comment-alt",
+                    title: "Tooltips: ON",
+                    
+                    onClick: function(control) {
+                        
+                        // checking if these layer groups exist
+                        
+                        var selected_point_group = map.layerManager.getLayerGroup('selected_point');
+                        var dark_points_group = map.layerManager.getLayerGroup('dark_points');
+                        
+                        // close open tooltips if the layers exist
+                        
+                        if (selected_point_group) selected_point_group.eachLayer(layer => layer.closeTooltip());
+                        if (dark_points_group) dark_points_group.eachLayer(layer => layer.closeTooltip());
+                        
+                        control.state("tooltips-off");
+                        
+                    }
+                }, {
+                    
+                    stateName: "tooltips-off",
+                    icon: "<i class='fa' style='color:#BDBDBD'> &#xf27a </i>",
+                    title: "Tooltips: OFF",
+                    
+                    onClick: function(control) {
+                        
+                        // checking if these layer groups exist
+                        
+                        var selected_point_group = map.layerManager.getLayerGroup('selected_point');
+                        var dark_points_group = map.layerManager.getLayerGroup('dark_points');
+                        
+                        // open closed tooltips if the layers exist
+                        
+                        if (selected_point_group) selected_point_group.eachLayer(layer => layer.openTooltip());
+                        if (dark_points_group) dark_points_group.eachLayer(layer => layer.openTooltip());
+                        
+                        control.state("tooltips-on");
                     }
                 }]
-        }).addTo(map);
-        
-        
-        //---------------------------------------------------------------------------//
-        // easyButton to toggle the tooltips
-        //---------------------------------------------------------------------------//
-        
-        L.easyButton({
-            position: "bottomleft",
-            states: [{
-                
-                stateName: "tooltips-on",
-                icon: "fa-comment-alt",
-                title: "Tooltips: ON",
-                
-                onClick: function(control) {
-                    
-                    // checking if these layer groups exist
-                    
-                    var selected_point_group = map.layerManager.getLayerGroup('selected_point');
-                    var dark_points_group = map.layerManager.getLayerGroup('dark_points');
-                    
-                    // close open tooltips if the layers exist
-                    
-                    if (selected_point_group) selected_point_group.eachLayer(layer => layer.closeTooltip());
-                    if (dark_points_group) dark_points_group.eachLayer(layer => layer.closeTooltip());
-                    
-                    control.state("tooltips-off");
-                    
-                }
-            }, {
-                
-                stateName: "tooltips-off",
-                icon: "<i class='fa' style='color:#BDBDBD'> &#xf27a </i>",
-                title: "Tooltips: OFF",
-                
-                onClick: function(control) {
-                    
-                    // checking if these layer groups exist
-                    
-                    var selected_point_group = map.layerManager.getLayerGroup('selected_point');
-                    var dark_points_group = map.layerManager.getLayerGroup('dark_points');
-                    
-                    // open closed tooltips if the layers exist
-                    
-                    if (selected_point_group) selected_point_group.eachLayer(layer => layer.openTooltip());
-                    if (dark_points_group) dark_points_group.eachLayer(layer => layer.openTooltip());
-                    
-                    control.state("tooltips-on");
-                }
-            }]
-        }).addTo(map);
+            }).addTo(map);
 
-    });
+        });
 
 });
 
