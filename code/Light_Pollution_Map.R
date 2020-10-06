@@ -148,7 +148,9 @@ sky_brightness_bbox <- st_bbox(sky_brightness)
 
 sky_brightness_coords <- sky_brightness %>% as_tibble() %>% drop_na()
 
-gc()
+# collecting garbage, because `stars` object is huge
+
+invisible(gc())
 
 #-----------------------------------------------------------------------------------------#
 # Adding extras ----
@@ -194,7 +196,7 @@ geoblaze_plugin <-
 
 # extramarkers
 
-ExtraMarkers_dir <- path(path_home_r(), "R", "Leaflet.ExtraMarkers")
+ExtraMarkers_dir <- path(here(), "code/plugins/Leaflet.ExtraMarkers")
 
 ExtraMarkers_plugin <-
     htmlDependency(
@@ -209,15 +211,18 @@ ExtraMarkers_plugin <-
 
 # geocoder
 
-Geocoder_plugin <- 
+Geocoder_dir <- path(here(), "code/plugins/Control.Geocoder")
+
+Geocoder_plugin <-
     htmlDependency(
-        name = "geocoder", 
-        version = 1,
-        src = list(href = "https://unpkg.com/leaflet-control-geocoder/dist"),
+        name = "geocoder",
+        version = fromJSON(path(Geocoder_dir, "package.json"))$version,
+        src = list(file = path(Geocoder_dir, "dist")),
         stylesheet = "Control.Geocoder.css",
         script = "Control.Geocoder.js",
         all_files = TRUE
     )
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # modifications of {leaflet} functions

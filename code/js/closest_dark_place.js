@@ -455,7 +455,9 @@ fetch(data_fl)
                 options = {
                     position: 'topleft',
                     showUniqueResult: false,
-                    defaultMarkGeocode: false
+                    defaultMarkGeocode: false,
+                    collapsed: true,
+                    expand: "touch"
                 }
             )
             .on(
