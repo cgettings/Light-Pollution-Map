@@ -27,19 +27,19 @@ The sky brightness data comes from a whole-world geotiff file of simulated zenit
 
 I create the map using `{leaflet}` and `addProviderTiles()`, with a custom tile layer drawn from the "USA_Topo_Maps" esri tile layer hosted on [ArcGIS online](https://services.arcgisonline.com/ArcGIS/rest/services/USA_Topo_Maps/MapServer/). I then add the `stars` raster to the map using `leafem::addGeoRaster()`, specifying colors using the `viridisLite::inferno()` palette, with breaks [computed](/code/Light_Pollution_Map.R#L320) so that qualitatively different colors roughly map onto the breaks between [Crumey's sky quality bands](https://academic.oup.com/mnras/article/442/3/2600/1052389#18902351): respectively, *Pristine vs. Black* (purple), *Black vs. Grey* (maroon), *Grey vs. Bright* (orange), and *Bright vs. White* (yellow). 
 
-I add the brightness mousover display using `leafem::addImageQuery()`, the OSM search using `leaflet.extras::addSearchOSM()`, and the map view reset botton by [modifying](/code/functions/addResetMapButtonPosition.R) `leaflet.extras::addResetMapButton()` to simply add a `position` argument to the `easyButton()` call. Finally, I add map dependencies using the [`registerPlugin`](http://rstudio.github.io/leaflet/extending.html) and `leaflet.extras::addAwesomeMarkersDependencies()` functions, and then pass my custom JavaScript and a `tbl` of raw raster data to `htmlwidgets::onRender()`.
+I add the brightness mousover display using `leafem::addImageQuery()`, and the map view reset botton by [modifying](/code/functions/addResetMapButtonPosition.R) `leaflet.extras::addResetMapButton()` to simply add a `position` argument to the `easyButton()` call. Finally, I add map dependencies using the [`registerPlugin`](http://rstudio.github.io/leaflet/extending.html) and `leaflet.extras::addAwesomeMarkersDependencies()` functions, and then pass my custom JavaScript and a `tbl` of raw raster data to `htmlwidgets::onRender()`.
 
 #### JavaScript
 
 This [custom JavaScript](/code/js/closest_dark_place.js) uses the raster data I passed to `htmlwidgets::onRender()`, along with the already-rendered map layer, to find the dark points.
 
-First, the script converts the raw raster data to `LatLng` points, with the magnitude value saved as the `alt[itude]` property. It then re-reads the raster layer data from the `DOM` using `fetch`, then uses the `georaster` package (already loaded thanks to `leafem::addGeoRaster()`) to parse the data.<sup id="note6">[6](#footnote6)</sup> The script then uses the [`geoblaze` package](https://github.com/GeoTIFF/geoblaze) to extract the magnitude value from where the raster was clicked.
+First, the script converts the raw raster data to `LatLng` points, with the magnitude value saved as the `alt[itude]` property. It then re-reads the raster layer data from the `DOM` using `fetch`, then uses the `georaster` package (already loaded thanks to `leafem::addGeoRaster()`) to parse the data.<sup id="note6">[6](#footnote6)</sup> The script then uses the [`geoblaze` package](https://github.com/GeoTIFF/geoblaze) to extract the magnitude value from where the raster was clicked. Instead of clicking on the map, a user can also search for a location using the search bar (which uses [`Control.Geocoder`](https://github.com/perliedman/leaflet-control-geocoder)), or find their location using the "locate" button (which uses Leaflet's [`map.locate`](https://leafletjs.com/reference-1.3.4.html#map-locate) method, implemented via an [`EasyButton`](https://github.com/cliffcloud/Leaflet.EasyButton)).
 
-Using that value, the script by default finds all points in the raw raster data that are between 1 and 2<sup id="note7">[7](#footnote7)</sup> EVs darker than the clicked point. The script then uses Leaflet's built-in `distanceTo` function to compute the distance between the clicked point and the filtered dark points, and finally selects the closest single point. 
+Using the raster's value at the selected point, the script by default finds all points in the raw raster data that are between 1 and 2<sup id="note7">[7](#footnote7)</sup> EVs darker than the selected point. The script then uses Leaflet's built-in `distanceTo` function to compute the distance between the selected point and the filtered dark points, and finally selects the closest single point. 
 
-The final dark points are then displayed on the map, with tooltips giving their brightness, distance, and coordinates; the unformatted values are also sent to the console (accessible via "Developer tools" in a web browser) as `LatLng` objects.
+The final dark points are then displayed on the map, with tooltips giving their brightness, distance, and coordinates; the unformatted values are also sent to the console (accessible via "Developer tools" in a web browser) as `LatLng` objects. When using the location search, the selected location's properties are sent to the console as well.
 
-Using the custom control, the user can change the number of dark points returned, the EV difference between the clicked and dark points (including negative difference values, which represent *brighter* points), and the maximum distance between the clicked and dark points. These user-specified control values are read from the DOM on the "click" event (fired by clicking on the map), and on the "update" event (fired by clicking on the control's "update" button).
+Using the dark point control, the user can change the number of dark points returned, the EV difference between the selected and dark points (including negative difference values, which represent *brighter* points), and the maximum distance between the selected and dark points. These user-specified control values are read from the DOM when the map is clicked, when the dark point control's "update" button is pressed, and when a location is found.
 
 
 ---
@@ -51,7 +51,7 @@ Using the custom control, the user can change the number of dark points returned
 * ~Change magnitude difference between clicked point and dark points~
 * Find dark points where specified celestial objects are visible<sup id="note8">[8](#footnote8)</sup>
 * ~Add explanation re: heat map color gradient~
-* Add more/better search functionality.
+* ~Add more/better search functionality~
 
 ---
 
