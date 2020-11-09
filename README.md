@@ -52,6 +52,7 @@ Using the dark point control, the user can change the number of dark points retu
 * Find dark points where specified celestial objects are visible<sup id="note8">[8](#footnote8)</sup>
 * ~Add explanation re: heat map color gradient~
 * ~Add more/better search functionality~
+* Add dynamic URL hash
 
 ---
 
