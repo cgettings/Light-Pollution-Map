@@ -1,0 +1,23 @@
+{
+  "name": "light_pollution",
+  "version": "1.0.0",
+  "description": "This map shows the brightness<sup id=\"note1\">[1](#footnote1)</sup> of the night sky from Maryland to Maine, constructed using [Leaflet](https://leafletjs.com/), mostly via the [`{leaflet}`](https://rstudio.github.io/leaflet/) package in R and its extension packages. Click anywhere on the map, and you'll get (by default) the closest single point that is at least 1 [Exposure Value (EV)](https://en.wikipedia.org/wiki/Exposure_value#EV_as_a_measure_of_luminance_and_illuminance) darker than the clicked point.<sup id=\"note2\">[2](#footnote2)</sup> You can use the \"dark point properties\" control to change: the number of dark points, their EV difference from the clicked point, and their maximum distance away.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cgettings/Light-Pollution-Map.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cgettings/Light-Pollution-Map/issues"
+  },
+  "homepage": "https://github.com/cgettings/Light-Pollution-Map#readme",
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.2.0",
+    "geoblaze": "^1.1.0"
+  }
+}

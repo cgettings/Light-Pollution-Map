@@ -1,6 +1,5 @@
 closest_dark_place_new.js
 setting up github ssh.txt
-<<<<<<< HEAD
 Leaflet click test.Rmd
 Leaflet input test 1.Rmd
 Leaflet input test 2.Rmd
@@ -13,7 +12,6 @@ Light_Pollution_Map_old.R
 mag dist html layout 1.html
 mag dist html layout 2.html
 mag dist html.html
-=======
->>>>>>> a2fa359208ac5de0aa8c9e8c174093025f4fea94
 css
 locate test.R
+node_modules/
