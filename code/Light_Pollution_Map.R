@@ -55,7 +55,7 @@ state_extent <-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 state_border <- 
-    states(cb = TRUE, resolution = "500k") %>% 
+    states(cb = TRUE, resolution = "500k", year = 2021) %>% 
     st_as_sf() %>% 
     filter(STUSPS %in% c("NY", "CT", "NH", "VT", "MA", "ME", "RI", "PA", "NJ", "MD", "DE")) %>%
     st_transform(crs = st_crs(4326)) %>%
@@ -81,12 +81,15 @@ luminance <-
 # finding which points are within specified borders
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
+sf_use_s2(FALSE)
+
 luminance_in_state <- 
     st_intersects(
         luminance, 
         state_border$geometry %>% st_combine(), 
         sparse = FALSE, 
-        as_points = FALSE
+        as_points = FALSE,
+        duplicate_edges = TRUE
     ) %>% 
     as.logical()
 
@@ -168,7 +171,7 @@ registerPlugin <-
 
 # my own FA library
 
-fa_dir <- path(path_home(), "node_modules/@fortawesome/fontawesome-free")
+fa_dir <- here("node_modules/@fortawesome/fontawesome-free")
 
 fa_plugin <-
     htmlDependency(
@@ -182,7 +185,7 @@ fa_plugin <-
 
 # geoblaze raster computation
 
-geoblaze_dir <- path(path_home(), "node_modules/geoblaze")
+geoblaze_dir <- here("node_modules/geoblaze")
 
 geoblaze_plugin <-
     htmlDependency(
@@ -196,7 +199,7 @@ geoblaze_plugin <-
 
 # extramarkers
 
-ExtraMarkers_dir <- path(here(), "code/plugins/Leaflet.ExtraMarkers")
+ExtraMarkers_dir <- here("code/plugins/Leaflet.ExtraMarkers")
 
 ExtraMarkers_plugin <-
     htmlDependency(
@@ -211,7 +214,7 @@ ExtraMarkers_plugin <-
 
 # geocoder
 
-Geocoder_dir <- path(here(), "code/plugins/Control.Geocoder")
+Geocoder_dir <- here("code/plugins/Control.Geocoder")
 
 Geocoder_plugin <-
     htmlDependency(
@@ -256,7 +259,7 @@ closest_dark_place <-
 
 
 #=========================================================================================#
-# Mapping
+# Mapping ----
 #=========================================================================================#
 
 #-----------------------------------------------------------------------------------------#
@@ -324,6 +327,7 @@ light_pollution_heatmap <-
     
     addGeoRaster(
         x = sky_brightness,
+        # x = sky_brightness_COG,
         project = TRUE,
         group = "Sky Brightness",
         layerId = "raster",
@@ -340,8 +344,10 @@ light_pollution_heatmap <-
                 breaks = 
                     sqrt(sqrt(sqrt(sqrt(
                         seq(
-                            min(sky_brightness$sky_brightness, na.rm = TRUE)^16, 
-                            max(sky_brightness$sky_brightness, na.rm = TRUE)^16, 
+                            # min(sky_brightness_COG$sky_brightness_COG.tif, na.rm = TRUE)^16,
+                            # max(sky_brightness_COG$sky_brightness_COG.tif, na.rm = TRUE)^16,
+                            min(sky_brightness$sky_brightness, na.rm = TRUE)^16,
+                            max(sky_brightness$sky_brightness, na.rm = TRUE)^16,
                             length.out = 64
                         )
                     )))),
@@ -368,6 +374,7 @@ light_pollution_heatmap <-
     
     addImageQuery(
         x = sky_brightness,
+        # x = sky_brightness_COG,
         group = "Sky Brightness",
         position = "topright",
         digits = 2,
@@ -401,7 +408,7 @@ light_pollution_heatmap <-
     )
     
 
-light_pollution_heatmap
+# light_pollution_heatmap
 
 #-----------------------------------------------------------------------------------------#
 # Saving map ----
@@ -409,7 +416,9 @@ light_pollution_heatmap
 
 saveWidget(
     widget = light_pollution_heatmap,
-    file = here("plots", "light_pollution_heatmap_georaster.html"),
+    file = here("plots", "light_pollution_heatmap_georaster_plain.html"),
+    # file = here("plots", "light_pollution_heatmap_georaster_COG.html"),
+    # selfcontained = FALSE,
     selfcontained = TRUE,
     title = "Light Pollution Heat Map for the Northeast US"
 )
