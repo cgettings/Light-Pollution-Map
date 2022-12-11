@@ -59,7 +59,7 @@ state_border <-
     states(cb = TRUE, resolution = "500k", year = 2021) %>% 
     st_as_sf() %>% 
     filter(STUSPS %in% c("NY", "CT", "NH", "VT", "MA", "ME", "RI", "PA", "NJ", "MD", "DE")) %>%
-    st_transform(crs = st_crs(4326)) %>%
+    st_transform(crs = st_crs(2263)) %>%
     as_tibble()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
@@ -72,7 +72,7 @@ luminance <-
     rast(here("data/World_Atlas_2015.tif")) %>% 
     crop(state_extent) %>% 
     st_as_stars(ignore_file = TRUE) %>% 
-    st_set_crs(st_crs(4326))
+    st_set_crs(st_crs(2263))
 
 #-----------------------------------------------------------------------------------------#
 # Subsetting and computing
