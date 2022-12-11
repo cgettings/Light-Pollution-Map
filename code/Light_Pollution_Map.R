@@ -15,7 +15,8 @@
 #-----------------------------------------------------------------------------------------#
 
 library(jsonlite)
-library(raster)
+# library(raster)
+library(terra)
 library(tidyverse)
 library(sf)
 library(leaflet)
@@ -47,7 +48,7 @@ state_bbox <-
 state_extent <- 
     with(
         state_bbox, 
-        extent(min(xmin), max(xmax), min(ymin), max(ymax))
+        ext(c(min(xmin), max(xmax), min(ymin), max(ymax)))
     )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
@@ -68,7 +69,7 @@ state_border <-
 # downloaded from http://doi.org/10.5880/GFZ.1.4.2016.001
 
 luminance <- 
-    raster(here("data/World_Atlas_2015.tif")) %>% 
+    rast(here("data/World_Atlas_2015.tif")) %>% 
     crop(state_extent) %>% 
     st_as_stars(ignore_file = TRUE) %>% 
     st_set_crs(st_crs(4326))
@@ -376,6 +377,7 @@ light_pollution_heatmap <-
         x = sky_brightness,
         # x = sky_brightness_COG,
         group = "Sky Brightness",
+        layerId = "raster",
         position = "topright",
         digits = 2,
         type = "mousemove",
@@ -416,7 +418,7 @@ light_pollution_heatmap <-
 
 saveWidget(
     widget = light_pollution_heatmap,
-    file = here("plots", "light_pollution_heatmap_georaster_plain.html"),
+    file = here("plots", "light_pollution_heatmap_georaster_plain_3.html"),
     # file = here("plots", "light_pollution_heatmap_georaster_COG.html"),
     # selfcontained = FALSE,
     selfcontained = TRUE,
