@@ -36,15 +36,26 @@ controls.addTo(map);
 
 // creating variable to store grid coordinates pulled from data
 
-grid_coords = [];
+let grid_coords = [];
 
-// looping through all coords in data
+fetch('sky_brightness_coords.json')
+    .then(response => response.json())
+    .then(async data => {
 
-for (var i = 0; i < data.x.length; i++) {
-    
-    grid_coords[i] = new L.LatLng(data.y[i], data.x[i], data.sky_brightness[i]);
-    
-}
+        // looping through all coords in data
+
+        console.log("data:", data);
+
+        for (var i = 0; i < data.x.length; i++) {
+            
+            grid_coords[i] = new L.LatLng(data.y[i], data.x[i], data.sky_brightness[i]);
+            
+        }
+        
+    })
+    .catch(error => console.log(error));
+
+
 
 
 //=============================================================================//

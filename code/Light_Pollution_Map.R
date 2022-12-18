@@ -36,83 +36,52 @@ library(fs)
 #-----------------------------------------------------------------------------------------#
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# bounding boxes for states
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-
-# downloaded from https://anthonylouisdagostino.com/bounding-boxes-for-all-us-states/
-
-state_bbox <- 
-    read_csv(here("data/US_State_Bounding_Boxes.csv")) %>% 
-    filter(STUSPS %in% c("NY", "CT", "NH", "VT", "MA", "ME", "RI", "PA", "NJ", "MD", "DE"))
-
-state_extent <- 
-    with(
-        state_bbox, 
-        ext(c(min(xmin), max(xmax), min(ymin), max(ymax)))
-    )
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # border for states
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 state_border <- 
     states(cb = TRUE, resolution = "500k", year = 2021) %>% 
-    st_as_sf() %>% 
-    filter(STUSPS %in% c("NY", "CT", "NH", "VT", "MA", "ME", "RI", "PA", "NJ", "MD", "DE")) %>%
-    st_transform(crs = st_crs(2263)) %>%
-    as_tibble()
+    # filter(GEOID < 60, !STUSPS %in% c("AK", "HI")) %>%
+    # st_as_sf() %>% 
+    filter(STUSPS %in% c("NY", "CT", "NH", "VT", "MA", "ME", "RI", "PA", "NJ", "MD", "DE", "MD", "WV", "OH")) %>%
+    st_transform(st_crs(2263)) %>% 
+    st_union() %>% 
+    st_transform(st_crs(4326)) %>% 
+    vect()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# luminance
+# luminance & finding which points are within specified borders
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 # downloaded from http://doi.org/10.5880/GFZ.1.4.2016.001
 
 luminance <- 
     rast(here("data/World_Atlas_2015.tif")) %>% 
-    crop(state_extent) %>% 
-    st_as_stars(ignore_file = TRUE) %>% 
-    st_set_crs(st_crs(2263))
+    crop(state_border, mask = TRUE)
 
 #-----------------------------------------------------------------------------------------#
 # Subsetting and computing
 #-----------------------------------------------------------------------------------------#
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# finding which points are within specified borders
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-
-sf_use_s2(FALSE)
-
-luminance_in_state <- 
-    st_intersects(
-        luminance, 
-        state_border$geometry %>% st_combine(), 
-        sparse = FALSE, 
-        as_points = FALSE,
-        duplicate_edges = TRUE
-    ) %>% 
-    as.logical()
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# subsetting and computing
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-
 sky_brightness <- 
     
     luminance %>% 
+    
+    # turn into stars object, so that as_tibble returns all 3 columns
+    
+    st_as_stars() %>% 
     
     # turning into a tbl to compute sky brightness
     
     as_tibble() %>% 
     
-    # use logical vector to filter rows
-    
-    filter(luminance_in_state) %>% 
-    
     # renaming to something that makes sense
     
     rename(luminance = World_Atlas_2015) %>% 
+    
+    # drop NAs representing cropped/masked values
+    
+    drop_na(luminance) %>% 
     
     # Computing mag/arcsec^2
     
@@ -141,6 +110,24 @@ sky_brightness <-
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# saving cropped raster
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+# sky_brightness_geotiff <- rast(sky_brightness)
+
+write_stars(
+    sky_brightness,
+    "plots/sky_brightness_geotiff.tif"
+)
+
+# writeRaster(
+#     sky_brightness_geotiff,
+#     "plots/sky_brightness_geotiff.tif",
+#     filetype = "GTiff",
+#     overwrite = TRUE
+# )
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # getting bbox for setting map bounds
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
@@ -150,7 +137,16 @@ sky_brightness_bbox <- st_bbox(sky_brightness)
 # converting to tbl, to pass to onRender
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
-sky_brightness_coords <- sky_brightness %>% as_tibble() %>% drop_na()
+sky_brightness_coords <- 
+    sky_brightness %>% 
+    as_tibble() %>% 
+    drop_na(sky_brightness)
+
+# saving as JSON to avoid embedding in document
+
+sky_brightness_coords %>% 
+    toJSON(pretty = FALSE, dataframe = "columns") %>% 
+    write_lines("plots/sky_brightness_coords.json")
 
 # collecting garbage, because `stars` object is huge
 
@@ -327,6 +323,9 @@ light_pollution_heatmap <-
     # sky brightness raster
     
     addGeoRaster(
+    # addGeotiff(
+        # url = "https://cgettings.github.io/Light-Pollution-Map/cog_with_cog/sky_brightness_COG.tif",
+        # file = "plots/sky_brightness_geotiff.tif",
         x = sky_brightness,
         # x = sky_brightness_COG,
         project = TRUE,
@@ -336,13 +335,13 @@ light_pollution_heatmap <-
         colorOptions =
             colorOptions(
                 palette = inferno(64, direction = -1),
-                
+
                 # modifying breaks to get a better mapping of visual differences to
                 #   photometric categories
-                # 
+                #
                 # 16 = 2^4, so need 4 `sqrt()` calls to reverse:
-                
-                breaks = 
+
+                breaks =
                     sqrt(sqrt(sqrt(sqrt(
                         seq(
                             # min(sky_brightness_COG$sky_brightness_COG.tif, na.rm = TRUE)^16,
@@ -354,9 +353,9 @@ light_pollution_heatmap <-
                     )))),
                 na.color = "#00000000"
             ),
-        options = 
+        options =
             tileOptions(
-                zIndex = 1000, 
+                zIndex = 1000,
                 updateWhenZooming = FALSE,
                 updateWhenIdle = TRUE
             )
@@ -405,8 +404,8 @@ light_pollution_heatmap <-
             "function(el, x, data) {\n",
             closest_dark_place,
             "}"
-        ), 
-        data = sky_brightness_coords
+        )
+        # data = sky_brightness_coords
     )
     
 
@@ -418,11 +417,17 @@ light_pollution_heatmap <-
 
 saveWidget(
     widget = light_pollution_heatmap,
-    file = here("plots", "light_pollution_heatmap_georaster_plain_3.html"),
+    # file = here("plots", "light_pollution_heatmap_georaster_FALSE_noraster.html"),
+    # file = here("plots", "light_pollution_heatmap_georaster_FALSE_noq.html"),
+    # file = here("plots", "light_pollution_heatmap_georaster_TRUE_noq.html"),
+    # file = here("plots", "light_pollution_heatmap_lower48_TRUE.html"),
+    # file = here("plots", "light_pollution_heatmap_lower48_FALSE.html"),
+    file = here("plots", "light_pollution_heatmap_georaster_FALSE_q.html"),
+    # file = here("plots", "light_pollution_heatmap_georaster_url_2.html"),
     # file = here("plots", "light_pollution_heatmap_georaster_COG.html"),
-    # selfcontained = FALSE,
-    selfcontained = TRUE,
-    title = "Light Pollution Heat Map for the Northeast US"
+    selfcontained = FALSE,
+    # selfcontained = TRUE,
+    title = "Light Pollution Heat Map for the US Northeast"
 )
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
