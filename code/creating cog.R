@@ -95,6 +95,11 @@ gdal_addo(
     read_only = TRUE
 )
 
+sky_brightness_COG_2 <-
+    rast(
+        "data/sky_brightness_COG_2.tif"
+    )
+
 # gdal_addo(
 #     file = "docs/reg/sky_brightness_geotiff.tif",
 #     method = "average"

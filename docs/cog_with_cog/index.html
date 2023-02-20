@@ -29,8 +29,8 @@
           attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(map);
 
-      // var url_to_geotiff_file = "sky_brightness_COG.tif";
-      var url_to_geotiff_file = "sky_brightness_geotiff_6.tif";
+      var url_to_geotiff_file = "sky_brightness_COG_2.tif";
+      // var url_to_geotiff_file = "sky_brightness_geotiff_6.tif";
 
       parseGeoraster(url_to_geotiff_file).then(georaster => {
         console.log("georaster:", georaster);
