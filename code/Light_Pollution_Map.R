@@ -120,13 +120,6 @@ write_stars(
     "plots/sky_brightness_geotiff.tif"
 )
 
-# writeRaster(
-#     sky_brightness_geotiff,
-#     "plots/sky_brightness_geotiff.tif",
-#     filetype = "GTiff",
-#     overwrite = TRUE
-# )
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # getting bbox for setting map bounds
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
@@ -329,8 +322,8 @@ light_pollution_heatmap <-
         x = sky_brightness,
         # x = sky_brightness_COG,
         project = TRUE,
-        group = "Sky Brightness",
-        layerId = "raster",
+        group = "Sky_Brightness",
+        layerId = "the_raster",
         resolution = 64,
         colorOptions =
             colorOptions(
@@ -375,8 +368,8 @@ light_pollution_heatmap <-
     addImageQuery(
         x = sky_brightness,
         # x = sky_brightness_COG,
-        group = "Sky Brightness",
-        layerId = "raster",
+        group = "Sky_Brightness",
+        layerId = "the_raster",
         position = "topright",
         digits = 2,
         type = "mousemove",
@@ -422,6 +415,7 @@ saveWidget(
     # file = here("plots", "light_pollution_heatmap_georaster_TRUE_noq.html"),
     # file = here("plots", "light_pollution_heatmap_lower48_TRUE.html"),
     # file = here("plots", "light_pollution_heatmap_lower48_FALSE.html"),
+    # file = here("plots", "light_pollution_heatmap_georaster_TRUE_q.html"),
     file = here("plots", "light_pollution_heatmap_georaster_FALSE_q.html"),
     # file = here("plots", "light_pollution_heatmap_georaster_url_2.html"),
     # file = here("plots", "light_pollution_heatmap_georaster_COG.html"),

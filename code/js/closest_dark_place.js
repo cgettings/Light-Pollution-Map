@@ -54,6 +54,8 @@ fetch('sky_brightness_coords.json')
         
     })
     .catch(error => console.log(error));
+    
+    console.log("grid_coords:", grid_coords);
 
 
 
@@ -65,6 +67,8 @@ fetch('sky_brightness_coords.json')
 //------------------------------------------------------------------------------//
 // selected point function
 //------------------------------------------------------------------------------//
+
+let selected_brightness;
 
 function selected_point_function(latlng, georaster) {
     
@@ -104,7 +108,9 @@ function selected_point_function(latlng, georaster) {
             georaster, 
             [latlng.lng, latlng.lat]
         )[0];
-    
+
+        console.log("geoblaze", geoblaze);
+
     
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
     // adding "Selected point" marker
@@ -177,7 +183,7 @@ function grid_coords_filter_fun (grid_coords) {
 // Function to add dark points
 //------------------------------------------------------------------------------//
 
-function dark_point_function(e) {
+function dark_point_function(e, georaster) {
     
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
     // getting value from controls (on click)
@@ -206,6 +212,31 @@ function dark_point_function(e) {
     num_points_value = Number(num_points_value);
     distance_value   = Number(distance_value);
     exposure_value   = Number(exposure_value);
+
+    let filteredRaster;
+
+    geoblaze.rasterCalculator(georaster, b => {
+
+            let x = 
+                b >= (selected_brightness + 
+                    (exposure_value * 0.752575)) && 
+            
+            b <= (selected_brightness + 
+                    (exposure_value * 0.752575) + (0.752575 * Math.sign(exposure_value))
+                );
+            
+            if (x === true) {
+                return b;
+            } else {
+                return null;
+            }
+        }).then(data => {
+
+            filteredRaster = data;
+            
+            console.log("filteredRaster", data);
+
+        });
     
     
     // applying the filtering function to the data
@@ -367,7 +398,7 @@ function dark_point_function(e) {
 // getting raster data from document via href, to identify the brightness value at the click point
 //      (originally provided through `leafem::addGeoRaster`)
 
-var data_fl = document.getElementById("raster" + "-1-attachment").href;
+var data_fl = document.getElementById("the_raster" + "-1-attachment").href;
 
 // parsing data, then passing it to a bunch of things
 
@@ -403,7 +434,7 @@ fetch(data_fl)
             map.on("click", function (e) {
                 
                 selected_point_function(e.latlng, georaster);
-                dark_point_function(e);
+                dark_point_function(e, georaster);
                     
             });
             
@@ -414,7 +445,7 @@ fetch(data_fl)
             
             map.on('update', function (e) {
                                 
-                dark_point_function(e);
+                dark_point_function(e, georaster);
                 
             });
             
