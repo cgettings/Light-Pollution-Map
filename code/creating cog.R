@@ -53,12 +53,15 @@ gdalUtilities::gdal_translate(
     )
 )
 
-file_copy("data/sky_brightness_geotiff.tif", "data/sky_brightness_geotiff_2.tif")
+file_copy("data/sky_brightness_geotiff.tif", "data/sky_brightness_geotiff_2.tif", overwrite = TRUE)
 
 gdal_addo(
     file = "data/sky_brightness_geotiff_2.tif",
-    overviews = c(2, 4, 8, 16),
-    method = "NEAREST"
+    # overviews = 1:16,
+    # overviews = c(2, 4, 8, 16),
+    overviews = 1:16,
+    method = "NEAREST",
+    read_only = TRUE
 )
 
 gdalUtilities::gdal_translate(
@@ -72,6 +75,25 @@ gdalUtilities::gdal_translate(
     )
 )
 
+gdalUtilities::gdal_translate(
+    src_dataset = "data/sky_brightness_geotiff.tif",
+    dst_dataset = "data/sky_brightness_COG_2.tif",
+    co = matrix(
+        c("TILED=YES",
+          "COPY_SRC_OVERVIEWS=YES",
+          "COMPRESS=DEFLATE"),
+        ncol = 1
+    )
+)
+
+gdal_addo(
+    file = "data/sky_brightness_COG_2.tif",
+    # overviews = 1:16,
+    # overviews = c(2, 4, 8, 16),
+    overviews = 1:16,
+    method = "NEAREST",
+    read_only = TRUE
+)
 
 # gdal_addo(
 #     file = "docs/reg/sky_brightness_geotiff.tif",
