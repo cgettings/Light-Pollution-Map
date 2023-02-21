@@ -20,9 +20,13 @@
     <script src="https://unpkg.com/proj4"></script>
     <script src="https://unpkg.com/georaster"></script>
     <script src="https://unpkg.com/georaster-layer-for-leaflet"></script>
+    <script src="https://unpkg.com/geoblaze"></script>
     <script>
+
+        let gr;
+
         // initalize leaflet map
-        var map = L.map('map').setView([42.4427334, -76.5158845], 8);
+        var map = L.map('map').setView([42.4427334, -76.5158845]);
         
         // add OpenStreetMap basemap
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -32,26 +36,44 @@
         var url_to_geotiff_file = "https://cgettings.github.io/Light-Pollution-Map/sky_brightness_COG.tif";
         
         parseGeoraster(url_to_geotiff_file).then(georaster => {
+
             console.log("georaster:", georaster);
-            
+
             /*
-            GeoRasterLayer is an extension of GridLayer,
-            which means can use GridLayer options like opacity.
-            Just make sure to include the georaster option!
-            http://leafletjs.com/reference-1.2.0.html#gridlayer
+                GeoRasterLayer is an extension of GridLayer,
+                which means can use GridLayer options like opacity.
+                Just make sure to include the georaster option!
+                http://leafletjs.com/reference-1.2.0.html#gridlayer
             */
+
             var layer = new GeoRasterLayer({
                 attribution: "Unknown",
                 georaster: georaster,
-                resolution: 256
+                resolution: 64,
+                opacity: 0.7
             });
             layer.addTo(map);
             
             map.fitBounds(layer.getBounds());
             
             map.on('click', function(evt) {
+
                 var latlng = map.mouseEventToLatLng(evt.originalEvent);
-                alert(geoblaze.identify(georaster, [latlng.lng, latlng.lat]));
+
+                geoblaze
+                    .identify(georaster, [latlng.lng, latlng.lat])
+                    .then(id => console.log("click", id));
+
+            });
+
+            map.on('mousemove', function(evt) {
+
+                var latlng = map.mouseEventToLatLng(evt.originalEvent);
+
+                geoblaze
+                    .identify(georaster, [latlng.lng, latlng.lat])
+                    .then(id => console.log("mousemove", id));
+
             });
             
         });

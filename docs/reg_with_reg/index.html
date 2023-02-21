@@ -22,7 +22,7 @@
     <script src="https://unpkg.com/geoblaze"></script>
     <script>
         // initalize leaflet map
-        var map = L.map('map').setView([42.4427334, -76.5158845], 8);
+        var map = L.map('map').setView([42.4427334, -76.5158845]);
         
         // add OpenStreetMap basemap
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -34,6 +34,7 @@
         fetch(url_to_geotiff_file)
         .then(response => response.arrayBuffer())
         .then(arrayBuffer => {
+
             parseGeoraster(arrayBuffer).then(georaster => {
                 console.log("georaster:", georaster);
                 var layer = new GeoRasterLayer({
@@ -46,8 +47,19 @@
                 map.fitBounds(layer.getBounds());
                 
                 map.on('click', function(evt) {
+
                     var latlng = map.mouseEventToLatLng(evt.originalEvent);
-                    alert(geoblaze.identify(georaster, [latlng.lng, latlng.lat]));
+                    
+                    console.log("click", geoblaze.identify(georaster, [latlng.lng, latlng.lat]));
+
+                });
+                
+                map.on('mousemove', function(evt) {
+
+                    var latlng = map.mouseEventToLatLng(evt.originalEvent);
+
+                    console.log("mousemove", geoblaze.identify(georaster, [latlng.lng, latlng.lat]));
+
                 });
                 
             });
