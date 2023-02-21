@@ -89,8 +89,8 @@ gdalUtilities::gdal_translate(
 gdal_addo(
     file = "data/sky_brightness_COG_2.tif",
     # overviews = 1:16,
-    # overviews = c(2, 4, 8, 16),
-    overviews = 1:16,
+    overviews = seq(2, 18, 2),
+    # overviews = 1:16,
     method = "NEAREST",
     read_only = TRUE
 )
