@@ -15,10 +15,10 @@
 #-----------------------------------------------------------------------------------------#
 
 library(jsonlite)
-# library(raster)
 library(terra)
 library(tidyverse)
 library(sf)
+library(gdalUtilities)
 library(leaflet)
 library(leaflet.extras)
 library(leafem)
@@ -30,6 +30,7 @@ library(here)
 library(glue)
 library(tigris)
 library(fs)
+library(geojsonio)
 
 #-----------------------------------------------------------------------------------------#
 # Loading data
@@ -39,15 +40,25 @@ library(fs)
 # border for states
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
-state_border <- 
+state_border_sf <- 
     states(cb = TRUE, resolution = "500k", year = 2021) %>% 
-    # filter(GEOID < 60, !STUSPS %in% c("AK", "HI")) %>%
-    # st_as_sf() %>% 
     filter(STUSPS %in% c("NY", "CT", "NH", "VT", "MA", "ME", "RI", "PA", "NJ", "MD", "DE", "MD", "WV", "OH")) %>%
     st_transform(st_crs(2263)) %>% 
     st_union() %>% 
-    st_transform(st_crs(4326)) %>% 
+    st_transform(st_crs(4326))
+
+state_border <- 
+    state_border_sf %>% 
     vect()
+
+# save as GeoJSON, then load in HTML as "mask" option to "GeoRasterLayer"
+
+geojson_write(
+    state_border_sf, 
+    geometry = "polygon",
+    file = "data/state_border.geojson"
+)
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # luminance & finding which points are within specified borders
@@ -120,6 +131,24 @@ write_stars(
     "plots/sky_brightness_geotiff.tif"
 )
 
+gdal_translate(
+    src_dataset = "data/sky_brightness_geotiff.tif",
+    dst_dataset = "data/sky_brightness_COG.tif",
+    co = matrix(
+        c("TILED=YES",
+          "COPY_SRC_OVERVIEWS=YES",
+          "COMPRESS=DEFLATE"),
+        ncol = 1
+    )
+)
+
+gdal_addo(
+    file = "data/sky_brightness_COG.tif",
+    overviews = c(2, 4, 8, 16),
+    method = "NEAREST",
+    read_only = TRUE
+)
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # getting bbox for setting map bounds
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
@@ -139,7 +168,21 @@ sky_brightness_coords <-
 
 sky_brightness_coords %>% 
     toJSON(pretty = FALSE, dataframe = "columns") %>% 
-    write_lines("plots/sky_brightness_coords.json")
+    write_lines("data/sky_brightness_coords.json")
+
+sky_brightness_breaks <- 
+    sqrt(sqrt(sqrt(sqrt(
+        seq(
+            min(sky_brightness$sky_brightness, na.rm = TRUE) ^ 16,
+            max(sky_brightness$sky_brightness, na.rm = TRUE) ^ 16,
+            length.out = 64
+        )
+    ))))
+
+sky_brightness_breaks %>% 
+    toJSON() %>% 
+    str_c("let breaks = ", .) %>% 
+    write_lines("data/sky_brightness_breaks.js")
 
 # collecting garbage, because `stars` object is huge
 

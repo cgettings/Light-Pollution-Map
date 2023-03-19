@@ -6,29 +6,29 @@ library(terra)
 library(gdalUtilities)
 library(fs)
 
-sky_brightness_2 <- rast(sky_brightness)
+# sky_brightness_2 <- rast(sky_brightness)
+# 
+# sky_brightness_2 <-
+#     rast(
+#         "C:/Users/Chris/Documents/Projects/light_pollution/data/sky_brightness_geotiff.tif"
+#     )
 
-sky_brightness_2 <-
-    rast(
-        "C:/Users/Chris/Documents/Projects/light_pollution/data/sky_brightness_geotiff.tif"
-    )
-
-writeRaster(
-    sky_brightness_2,
-    "data/sky_brightness_geotiff.tif",
-    filetype = "GTiff",
-    overwrite = TRUE
-)
-
-writeRaster(
-    sky_brightness_2,
-    "data/sky_brightness_COG.tif",
-    filetype = "COG",
-    overwrite = TRUE
-)
-
-sky_brightness_COG <-
-    rast("data/sky_brightness_COG.tif") %>% st_as_stars()
+# writeRaster(
+#     sky_brightness_2,
+#     "data/sky_brightness_geotiff.tif",
+#     filetype = "GTiff",
+#     overwrite = TRUE
+# )
+# 
+# writeRaster(
+#     sky_brightness_2,
+#     "data/sky_brightness_COG.tif",
+#     filetype = "COG",
+#     overwrite = TRUE
+# )
+# 
+# sky_brightness_COG <-
+#     rast("data/sky_brightness_COG.tif") %>% st_as_stars()
 
 # gdalUtilities::gdal_translate(
 #     src_dataset = "data/sky_brightness_geotiff.tif",
@@ -41,64 +41,6 @@ sky_brightness_COG <-
 #     )
 # )
 
-
-gdalUtilities::gdal_translate(
-    src_dataset = "data/sky_brightness_geotiff.tif",
-    dst_dataset = "data/sky_brightness_geotiff_1.tif",
-    co = matrix(
-        c("TILED=YES",
-          "COPY_SRC_OVERVIEWS=YES",
-          "COMPRESS=DEFLATE"),
-        ncol = 1
-    )
-)
-
-file_copy("data/sky_brightness_geotiff.tif", "data/sky_brightness_geotiff_2.tif", overwrite = TRUE)
-
-gdal_addo(
-    file = "data/sky_brightness_geotiff_2.tif",
-    # overviews = 1:16,
-    # overviews = c(2, 4, 8, 16),
-    overviews = 1:16,
-    method = "NEAREST",
-    read_only = TRUE
-)
-
-gdalUtilities::gdal_translate(
-    src_dataset = "data/sky_brightness_geotiff_2.tif",
-    dst_dataset = "data/sky_brightness_geotiff_3.tif",
-    co = matrix(
-        c("TILED=YES",
-          "COPY_SRC_OVERVIEWS=YES",
-          "COMPRESS=DEFLATE"),
-        ncol = 1
-    )
-)
-
-gdalUtilities::gdal_translate(
-    src_dataset = "data/sky_brightness_geotiff.tif",
-    dst_dataset = "data/sky_brightness_COG_2.tif",
-    co = matrix(
-        c("TILED=YES",
-          "COPY_SRC_OVERVIEWS=YES",
-          "COMPRESS=DEFLATE"),
-        ncol = 1
-    )
-)
-
-gdal_addo(
-    file = "data/sky_brightness_COG_2.tif",
-    # overviews = 1:16,
-    overviews = seq(2, 18, 2),
-    # overviews = 1:16,
-    method = "NEAREST",
-    read_only = TRUE
-)
-
-sky_brightness_COG_2 <-
-    rast(
-        "data/sky_brightness_COG_2.tif"
-    )
 
 # gdal_addo(
 #     file = "docs/reg/sky_brightness_geotiff.tif",
@@ -131,19 +73,29 @@ sky_brightness_COG_2 <-
 # )
 
 
-gdal_utils(
-    util = "translate",
-    source = "data/sky_brightness_geotiff.tif",
-    destination = "data/sky_brightness_geotiff_4.tif",
-    options = c("TILED=YES", "COPY_SRC_OVERVIEWS=YES"),
-    quiet = FALSE
+gdal_translate(
+    src_dataset = "data/sky_brightness_geotiff.tif",
+    dst_dataset = "data/sky_brightness_COG_3.tif",
+    co = matrix(
+        c("TILED=YES",
+          "COPY_SRC_OVERVIEWS=YES",
+          "COMPRESS=DEFLATE"),
+        ncol = 1
+    )
 )
 
-gdal_utils(
-    util = "translate",
-    source = "data/sky_brightness_geotiff_2.tif",
-    destination = "data/sky_brightness_geotiff_5.tif",
-    options = c("TILED=YES", "COPY_SRC_OVERVIEWS=YES"),
-    quiet = FALSE
+gdal_addo(
+    file = "data/sky_brightness_COG_3.tif",
+    overviews = c(2, 4, 8, 16),
+    method = "NEAREST",
+    read_only = TRUE
 )
 
+
+sqrt(sqrt(sqrt(sqrt(
+    seq(
+        min(sky_brightness$sky_brightness, na.rm = TRUE) ^ 16,
+        max(sky_brightness$sky_brightness, na.rm = TRUE) ^ 16,
+        length.out = 64
+    )
+))))

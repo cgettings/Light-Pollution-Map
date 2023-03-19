@@ -21,37 +21,132 @@
     <script src="https://unpkg.com/georaster"></script>
     <script src="https://unpkg.com/georaster-layer-for-leaflet"></script>
     <script src="https://unpkg.com/geoblaze"></script>
+    <script src="https://unpkg.com/d3"></script>
+    <script src="https://unpkg.com/chroma-js/chroma.min.js"></script>
+    <script src="SkyBrightness.js"></script>
+    <script src="sky_brightness_breaks.js"></script>
     <script>
 
         let gr;
 
+        // let breaks;
+        let min;
+        let max;
+        let diff;
+        let domain;
+        let scale;
+        
+        let sky_brightness_breaks = d3.json("sky_brightness_breaks.json")
+
+        const range = (start, stop, step = 1) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
+        // const range = (start, step, length) => Array.from({ length: length}, (_, i) => start + (i * step));
+
+
+        let inferno = d3.scaleSequential(d3.interpolateInferno);
+
+        let inferno_cols = range(0, 1, 1/64).map(c => inferno(1 - c))
+
+        console.log("inferno_cols", inferno_cols);
+        
+
+
         // initalize leaflet map
-        var map = L.map('map').setView([42.4427334, -76.5158845]);
+        let map = L.map('map').setView([42.4427334, -76.5158845]);
         
         // add OpenStreetMap basemap
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
         
-        var url_to_geotiff_file = "https://cgettings.github.io/Light-Pollution-Map/sky_brightness_COG.tif";
+        let url_to_geotiff_file = "https://cgettings.github.io/Light-Pollution-Map/sky_brightness_COG.tif";
         
         parseGeoraster(url_to_geotiff_file).then(georaster => {
-
+            
             console.log("georaster:", georaster);
 
-            /*
-                GeoRasterLayer is an extension of GridLayer,
-                which means can use GridLayer options like opacity.
-                Just make sure to include the georaster option!
-                http://leafletjs.com/reference-1.2.0.html#gridlayer
-            */
+            gr = georaster;
+
+            let min_0 = [];
+            let max_0 = [];
+
+            let min_max = data['Sky Brightness'].map(x => {
+
+                let no_null = x.filter(y => y !== null && Math.abs(y) !== Infinity);
+
+                // let min_00 = Math.min.apply(null, no_null).filter(y => y !== null && Math.abs(y) !== Infinity);
+                // let max_00 = Math.max.apply(null, no_null).filter(y => y !== null && Math.abs(y) !== Infinity);
+
+                // let min_00 = Math.min.apply(null, no_null)
+                // let max_00 = Math.max.apply(null, no_null)
+
+                let min_00 = Math.min(...no_null)
+                let max_00 = Math.max(...no_null)
+
+                // console.log("min_00", min_00);
+                // console.log("max_00", max_00);
+
+                min_0.push(Math.min(...no_null));
+                max_0.push(Math.max(...no_null));
+
+                // return {min: min, max: max};
+
+            })
+            
+            // console.log("min_max", min_max);
+
+            min = Math.min(...min_0.filter(y => y !== null && Math.abs(y) !== Infinity));
+            max = Math.min(...max_0.filter(y => y !== null && Math.abs(y) !== Infinity));
+
+            // diff = max - min;
+            
+            console.log("min", min);
+            console.log("max", max);
+            // console.log("diff", diff);
+
+            // console.log("range(min**16, max**16, diff/64)", range(min**16, max**16, diff**16/64));
+
+            // breaks = range((min**16), ((diff**16)/64), 64).map(x => Math.sqrt(Math.sqrt(Math.sqrt(Math.sqrt(...x)))))
+            // breaks = range((min**16), (max**16), (((max**16) - (min**16))/64)).map(x => Math.sqrt(Math.sqrt(Math.sqrt(Math.sqrt(x)))))
+
+            console.log("breaks [1]", breaks);
+            
+            domain = [min, max]
+            
+            // get color palette etc
+            scale = chroma.scale(inferno_cols);
+            let nacol = "#00000000";
+            
+            // console.log("scale", scale);
+            
+            scale = scale.classes(breaks);
+            
+            // console.log("scale", scale);
+
+            
+            // define pixel value -> colorm mapping
+
+            let pixelValuesToColorFn = values => {
+
+                // console.log("values", values);
+
+                let clr = scale.domain(domain);
+                // console.log("clr", clr);
+
+                if (isNaN(values) || values === georaster.noDataValue) return nacol;
+                return clr(values).hex();
+            };
 
             var layer = new GeoRasterLayer({
                 attribution: "Unknown",
                 georaster: georaster,
+                pixelValuesToColorFn: pixelValuesToColorFn,
                 resolution: 64,
-                opacity: 0.7
+                opacity: 0.7,
+                debugLevel: 1,
+                mask: "./state_border.geojson",
+                mask_strategy: "outside"
             });
+
             layer.addTo(map);
             
             map.fitBounds(layer.getBounds());
@@ -66,15 +161,15 @@
 
             });
 
-            map.on('mousemove', function(evt) {
+            // map.on('mousemove', function(evt) {
 
-                var latlng = map.mouseEventToLatLng(evt.originalEvent);
+            //     var latlng = map.mouseEventToLatLng(evt.originalEvent);
 
-                geoblaze
-                    .identify(georaster, [latlng.lng, latlng.lat])
-                    .then(id => console.log("mousemove", id));
+            //     geoblaze
+            //         .identify(georaster, [latlng.lng, latlng.lat])
+            //         .then(id => console.log("mousemove", id));
 
-            });
+            // });
             
         });
         
