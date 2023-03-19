@@ -40,7 +40,9 @@
                 var layer = new GeoRasterLayer({
                     georaster: georaster,
                     resolution: 64,
-                    opacity: 0.7
+                    opacity: 0.7,
+                    mask: "./state_border.geojson",
+                    mask_strategy: "outside"
                 });
                 layer.addTo(map);
                 
@@ -54,13 +56,13 @@
 
                 });
                 
-                map.on('mousemove', function(evt) {
+                // map.on('mousemove', function(evt) {
 
-                    var latlng = map.mouseEventToLatLng(evt.originalEvent);
+                //     var latlng = map.mouseEventToLatLng(evt.originalEvent);
 
-                    console.log("mousemove", geoblaze.identify(georaster, [latlng.lng, latlng.lat]));
+                //     console.log("mousemove", geoblaze.identify(georaster, [latlng.lng, latlng.lat]));
 
-                });
+                // });
                 
             });
         });
