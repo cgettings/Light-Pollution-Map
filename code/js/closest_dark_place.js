@@ -3,24 +3,27 @@
 // renaming map object
 //=============================================================================//
 
-map = this;
+let map = this;
 
 //=============================================================================//
 // adding `div` for custom dark point control
 //=============================================================================//
 
-var controls = L.control({position: 'bottomright'});
+let dark_point_control = await d3.text("dark_point_control.html");
+console.log("dark_point_control", dark_point_control); // Hello, world!
+
+let controls = L.control({position: 'bottomright'});
 
 controls.onAdd = function (map) {
     
-    var div = L.DomUtil.create('div');
+    let div = L.DomUtil.create('div');
     
     // onclick = 'map.fire(\"change\");' fires an event called 'change' on button press, which is 
     //  picked up by a function that gets the values from the form fields
     
     // I will replace these 4 #'s with HTML in R'
     
-    div.innerHTML = `####`;
+    div.innerHTML = dark_point_control;
 
     L.DomEvent.disableClickPropagation(div);
     
@@ -36,28 +39,26 @@ controls.addTo(map);
 
 // creating variable to store grid coordinates pulled from data
 
-let grid_coords = [];
+// let grid_coords = [];
 
-fetch('sky_brightness_coords.json')
-    .then(response => response.json())
-    .then(async data => {
+// fetch('sky_brightness_coords.json')
+//     .then(response => response.json())
+//     .then(async data => {
 
-        // looping through all coords in data
+//         // looping through all coords in data
 
-        console.log("data:", data);
+//         console.log("data:", data);
 
-        for (var i = 0; i < data.x.length; i++) {
+//         for (let i = 0; i < data.x.length; i++) {
             
-            grid_coords[i] = new L.LatLng(data.y[i], data.x[i], data.sky_brightness[i]);
+//             grid_coords[i] = new L.LatLng(data.y[i], data.x[i], data.sky_brightness[i]);
             
-        }
+//         }
         
-    })
-    .catch(error => console.log(error));
+//     })
+//     .catch(error => console.log(error));
     
-    console.log("grid_coords:", grid_coords);
-
-
+// console.log("grid_coords:", grid_coords);
 
 
 //=============================================================================//
@@ -261,7 +262,7 @@ function dark_point_function(e, georaster) {
     
     j = [];
     
-    for (var j = 0; j < grid_coords_filtered.length; j++) {
+    for (const j = 0; j < grid_coords_filtered.length; j++) {
         
         distance = grid_coords_filtered[j].distanceTo(selected_point_loc);
         
@@ -319,7 +320,7 @@ function dark_point_function(e, georaster) {
         
         // adding dark points
         
-        for (var k = 0; k < dark_points.length; k++) {
+        for (const k = 0; k < dark_points.length; k++) {
             
             // adding a marker at the darkest point(s)
             
@@ -398,7 +399,7 @@ function dark_point_function(e, georaster) {
 // getting raster data from document via href, to identify the brightness value at the click point
 //      (originally provided through `leafem::addGeoRaster`)
 
-var data_fl = document.getElementById("the_raster" + "-1-attachment").href;
+let data_fl = document.getElementById("the_raster" + "-1-attachment").href;
 
 // parsing data, then passing it to a bunch of things
 
@@ -597,8 +598,8 @@ fetch(data_fl)
                         
                         // checking if these layer groups exist
                         
-                        var selected_point_group = map.layerManager.getLayerGroup('selected_point');
-                        var dark_points_group = map.layerManager.getLayerGroup('dark_points');
+                        let selected_point_group = map.layerManager.getLayerGroup('selected_point');
+                        let dark_points_group = map.layerManager.getLayerGroup('dark_points');
                         
                         // close open tooltips if the layers exist
                         
@@ -618,8 +619,8 @@ fetch(data_fl)
                         
                         // checking if these layer groups exist
                         
-                        var selected_point_group = map.layerManager.getLayerGroup('selected_point');
-                        var dark_points_group = map.layerManager.getLayerGroup('dark_points');
+                        let selected_point_group = map.layerManager.getLayerGroup('selected_point');
+                        let dark_points_group = map.layerManager.getLayerGroup('dark_points');
                         
                         // open closed tooltips if the layers exist
                         

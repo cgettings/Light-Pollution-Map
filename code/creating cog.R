@@ -5,6 +5,7 @@ library(sf)
 library(terra)
 library(gdalUtilities)
 library(fs)
+library(palr)
 
 # sky_brightness_2 <- rast(sky_brightness)
 # 

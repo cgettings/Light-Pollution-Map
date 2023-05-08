@@ -1,0 +1,49 @@
+<VRTDataset rasterXSize="2144" rasterYSize="1231">
+  <SRS dataAxisToSRSAxisMapping="2,1">GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AXIS["Latitude",NORTH],AXIS["Longitude",EAST],AUTHORITY["EPSG","4326"]]</SRS>
+  <GeoTransform> -8.4816704740000006e+01,  8.3333299999992505e-03,  0.0000000000000000e+00,  4.7462515234500088e+01,  0.0000000000000000e+00, -8.3333299999992505e-03</GeoTransform>
+  <Metadata>
+    <MDI key="AREA_OR_POINT">Area</MDI>
+  </Metadata>
+  <Metadata domain="IMAGE_STRUCTURE">
+    <MDI key="INTERLEAVE">PIXEL</MDI>
+  </Metadata>
+  <VRTRasterBand dataType="Byte" band="1" blockYSize="1">
+    <Description>red</Description>
+    <ColorInterp>Red</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">sky_brightness_geotiff.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="2144" RasterYSize="1231" DataType="Byte" BlockXSize="2144" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="2144" ySize="1231" />
+      <DstRect xOff="0" yOff="0" xSize="2144" ySize="1231" />
+      <ScaleOffset>0</ScaleOffset>
+      <ScaleRatio>1.00392</ScaleRatio>
+    </ComplexSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="2" blockYSize="1">
+    <Description>green</Description>
+    <ColorInterp>Green</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">sky_brightness_geotiff.tif</SourceFilename>
+      <SourceBand>2</SourceBand>
+      <SourceProperties RasterXSize="2144" RasterYSize="1231" DataType="Byte" BlockXSize="2144" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="2144" ySize="1231" />
+      <DstRect xOff="0" yOff="0" xSize="2144" ySize="1231" />
+      <ScaleOffset>0</ScaleOffset>
+      <ScaleRatio>1.00392</ScaleRatio>
+    </ComplexSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="3" blockYSize="1">
+    <Description>blue</Description>
+    <ColorInterp>Blue</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">sky_brightness_geotiff.tif</SourceFilename>
+      <SourceBand>3</SourceBand>
+      <SourceProperties RasterXSize="2144" RasterYSize="1231" DataType="Byte" BlockXSize="2144" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="2144" ySize="1231" />
+      <DstRect xOff="0" yOff="0" xSize="2144" ySize="1231" />
+      <ScaleOffset>-4.07967</ScaleOffset>
+      <ScaleRatio>1.01992</ScaleRatio>
+    </ComplexSource>
+  </VRTRasterBand>
+</VRTDataset>

@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>COG</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="/node_modules/leaflet/dist/leaflet.css"/>
     <style>
         #map {
             bottom: 0;
@@ -13,18 +13,25 @@
             top: 0;
         }
     </style>
+    <link rel="stylesheet" href="/node_modules/@fortawesome/fontawesome-free/css/all.css"/>
 </head>
 <body>
     <div id="map"></div>
-    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/proj4"></script>
-    <script src="https://unpkg.com/georaster"></script>
-    <script src="https://unpkg.com/georaster-layer-for-leaflet"></script>
-    <script src="https://unpkg.com/geoblaze"></script>
-    <script src="https://unpkg.com/d3"></script>
-    <script src="https://unpkg.com/chroma-js/chroma.min.js"></script>
+
+    <script src="/node_modules/d3/dist/d3.min.js"></script>
+    <script src="/node_modules/chroma-js/chroma.min.js"></script>
+    <script src="/node_modules/proj4/dist/proj4.js"></script>
+    <script src="/node_modules/leaflet/dist/leaflet.js"></script>
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="/node_modules/georaster/dist/georaster.browser.bundle.min.js"></script>
+    <script src="/node_modules/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
+    <script src="/node_modules/geoblaze/dist/geoblaze.web.min.js"></script>
+    <script src="leaflet-binding-2.1.1/leaflet.js"></script>
+    
     <script src="SkyBrightness.js"></script>
     <script src="sky_brightness_breaks.js"></script>
+    <script src="closest_dark_place.js"></script>
+
     <script>
 
         let gr;
@@ -37,6 +44,8 @@
         let scale;
         
         let sky_brightness_breaks = d3.json("sky_brightness_breaks.json")
+
+        console.log("sky_brightness_breaks", sky_brightness_breaks);
 
         const range = (start, stop, step = 1) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
         // const range = (start, step, length) => Array.from({ length: length}, (_, i) => start + (i * step));
@@ -51,7 +60,9 @@
 
 
         // initalize leaflet map
-        let map = L.map('map').setView([42.4427334, -76.5158845]);
+        let map = L.map('map');
+
+        console.log("map", map);
         
         // add OpenStreetMap basemap
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -160,6 +171,8 @@
 
             });
 
+
+
             // map.on('mousemove', function(evt) {
 
             //     var latlng = map.mouseEventToLatLng(evt.originalEvent);
@@ -171,6 +184,27 @@
             // });
             
         });
+
+        let grid_coords = [];
+
+        fetch('sky_brightness_coords.json')
+            .then(response => response.json())
+            .then(async data => {
+
+                // looping through all coords in data
+
+                console.log("data:", data);
+
+                for (var i = 0; i < data.x.length; i++) {
+                    
+                    grid_coords[i] = new L.LatLng(data.y[i], data.x[i], data.sky_brightness[i]);
+                    
+                }
+                
+            })
+            .catch(error => console.log(error));
+            
+        console.log("grid_coords:", grid_coords);
         
     </script>
 </body>

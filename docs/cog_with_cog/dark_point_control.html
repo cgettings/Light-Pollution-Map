@@ -1,0 +1,99 @@
+
+<div 
+    class = 'leaflet-control-layers'
+    style = 'padding: 10px 10px 10px 10px;'>
+    
+    <div style = 'font-family:sans-serif;color:black'>
+    
+        <div style = '
+            text-align:center;
+            font-weight:bold;
+            font-size: 1.1em;'
+        > Dark point properties </div>
+        
+        <br>
+        
+        <div style = 'display: flex; flex-flow: row nowrap; justify-content: space-between;'>
+            
+            <div style = 'order: 1;'>
+                <label 
+                    for = 'num_points'
+                    title = 'Number of dark points to show'
+                > # of points &nbsp; </label>
+            </div>
+        
+            <div style = 'order: 2;'>
+                <input 
+                    title = 'Number of dark points to show'
+                    class = 'leaflet-control-layers-overlays' 
+                    id = 'num_points' 
+                    type = 'number' 
+                    min = '0'
+                    step = '1'
+                    placeholder = 1
+                    style = 'width:60px;font-family:sans-serif'
+                />
+            </div>
+        </div>
+        
+        <div style = 'display: flex; flex-flow: row nowrap; justify-content: space-between;'>
+            
+            <div style = 'order: 1;'>
+                <label 
+                    for = 'distance'
+                    title = 'Maximum distance between selected point and dark points'
+                > Max dist (km) &nbsp; </label>
+            </div>
+            
+            <div style = 'order: 2;'>
+                <input 
+                    title = 'Maximum distance between selected point and dark points'
+                    class = 'leaflet-control-layers-overlays' 
+                    id = 'distance' 
+                    type = 'number' 
+                    min = '0'
+                    step = 0.1 
+                    placeholder = Infinity
+                    style = 'width:60px;font-family:sans-serif'
+                />  
+            </div>
+        </div>
+        
+        <div style = 'display: flex; flex-flow: row nowrap; justify-content: space-between;'>
+            
+            <div style = 'order: 1;'>
+                <label 
+                    for = 'exposure'
+                    title = 'Difference in Exposure Value (K = 12.5) between selected point and dark points (1 EV &asymp; 0.75 mags)'
+                > EV diff &nbsp; </label>
+            </div>
+        
+            <div style = 'order: 2;'>
+                <input 
+                    title = 'Difference in Exposure Value (K = 12.5) between selected point and dark points (1 EV &asymp; 0.75 mags)'
+                    class = 'leaflet-control-layers-overlays' 
+                    id = 'exposure' 
+                    type = 'number' 
+                    step = 0.1 
+                    placeholder = 1
+                    style = 'width:60px;font-family:sans-serif'
+                />
+            </div>
+        </div>
+        
+        <br>
+        
+        <div style = 'display: flex; flex-flow: row nowrap; justify-content: center;'>
+            
+            <div style = 'order: 1;'>
+                <input 
+                    type = 'button' 
+                    onclick = 'map.fire(\"update\");'
+                    value = 'update'
+                    style = 'font-family:\"Lucida Console\", Monaco, monospace;'
+                />
+    
+            </div>
+        </div>
+    </div>
+</div>

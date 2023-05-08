@@ -31,6 +31,7 @@ library(glue)
 library(tigris)
 library(fs)
 library(geojsonio)
+library(palr)
 
 #-----------------------------------------------------------------------------------------#
 # Loading data
@@ -121,35 +122,6 @@ sky_brightness <-
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# saving cropped raster
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-
-# sky_brightness_geotiff <- rast(sky_brightness)
-
-write_stars(
-    sky_brightness,
-    "plots/sky_brightness_geotiff.tif"
-)
-
-gdal_translate(
-    src_dataset = "data/sky_brightness_geotiff.tif",
-    dst_dataset = "data/sky_brightness_COG.tif",
-    co = matrix(
-        c("TILED=YES",
-          "COPY_SRC_OVERVIEWS=YES",
-          "COMPRESS=DEFLATE"),
-        ncol = 1
-    )
-)
-
-gdal_addo(
-    file = "data/sky_brightness_COG.tif",
-    overviews = c(2, 4, 8, 16),
-    method = "NEAREST",
-    read_only = TRUE
-)
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # getting bbox for setting map bounds
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
@@ -187,6 +159,51 @@ sky_brightness_breaks %>%
 # collecting garbage, because `stars` object is huge
 
 invisible(gc())
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# setting colors
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+sky_brightness_colored <-
+    image_raster(
+        as(sky_brightness, "Raster"), 
+        col = inferno(64, direction = -1),
+        breaks = sky_brightness_breaks
+    ) %>% 
+    st_as_stars() %>% 
+    st_set_crs(value = st_crs(4326))
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# saving cropped raster
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+# sky_brightness_geotiff <- rast(sky_brightness)
+
+write_stars(
+    sky_brightness_colored,
+    "plots/sky_brightness_geotiff.tif",
+    type = "Byte"
+)
+
+# gdal_translate(
+#     src_dataset = "plots/sky_brightness_geotiff.tif",
+#     dst_dataset = "data/sky_brightness_COG.tif",
+#     co = matrix(
+#         c("TILED=YES",
+#           "COPY_SRC_OVERVIEWS=YES",
+#           "COMPRESS=DEFLATE"),
+#         ncol = 1
+#     )
+# )
+# 
+# gdal_addo(
+#     file = "data/sky_brightness_COG.tif",
+#     overviews = c(2, 4, 8, 16),
+#     method = "NEAREST",
+#     read_only = TRUE
+# )
 
 #-----------------------------------------------------------------------------------------#
 # Adding extras ----
