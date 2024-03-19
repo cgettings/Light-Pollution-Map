@@ -1,6 +1,6 @@
-<VRTDataset rasterXSize="1950" rasterYSize="1520" subClass="VRTWarpedDataset">
+<VRTDataset rasterXSize="3375" rasterYSize="1694" subClass="VRTWarpedDataset">
   <SRS dataAxisToSRSAxisMapping="1,2">PROJCS["WGS 84 / Pseudo-Mercator",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Mercator_1SP"],PARAMETER["central_meridian",0],PARAMETER["scale_factor",1],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],EXTENSION["PROJ4","+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs"],AUTHORITY["EPSG","3857"]]</SRS>
-  <GeoTransform> -9.4417523824202344e+06,  1.0200105646190066e+03,  0.0000000000000000e+00,  6.0178978197077652e+06,  0.0000000000000000e+00, -1.0200105646190066e+03</GeoTransform>
+  <GeoTransform> -1.0670904601601545e+07,  9.5356511017370337e+02,  0.0000000000000000e+00,  4.4327228434711145e+06,  0.0000000000000000e+00, -9.5356511017370337e+02</GeoTransform>
   <Metadata domain="IMAGE_STRUCTURE">
     <MDI key="INTERLEAVE">PIXEL</MDI>
   </Metadata>
@@ -25,20 +25,20 @@
     <Option name="UNIFIED_SRC_NODATA">YES</Option>
     <Option name="INIT_DEST">0</Option>
     <Option name="ERROR_OUT_IF_EMPTY_SOURCE_WINDOW">FALSE</Option>
-    <SourceDataset relativeToVRT="1">plots/sky_brightness_geotiff/sky_brightness_geotiff.tif</SourceDataset>
+    <SourceDataset relativeToVRT="1">plots/sky_brightness_geotiff/sky_brightness_geotiff_2.tif</SourceDataset>
     <Transformer>
       <GenImgProjTransformer>
-        <SrcGeoTransform>-84.8167047400000058,0.0083333299999992505,0,47.4625152345000885,0,-0.0083333299999992505</SrcGeoTransform>
-        <SrcInvGeoTransform>10178.0086400043729,120.000048000029992,0,5695.50410634216496,0,-120.000048000029992</SrcInvGeoTransform>
-        <DstGeoTransform>-9441752.38242023438,1020.01056461900657,0,6017897.81970776524,0,-1020.01056461900657</DstGeoTransform>
-        <DstInvGeoTransform>9256.52410859774682,0.000980382002585942873,0,5899.83871584267854,0,-0.000980382002585942873</DstInvGeoTransform>
+        <SrcGeoTransform>-95.8583669900000075,0.0083333299999992505,0,36.9541861045000886,0,-0.0083333299999992505</SrcGeoTransform>
+        <SrcInvGeoTransform>11503.0086400044911,120.000048000029992,0,4434.50410634205218,0,-120.000048000029992</SrcInvGeoTransform>
+        <DstGeoTransform>-10670904.6016015448,953.565110173703374,0,4432722.84347111452,0,-953.565110173703374</DstGeoTransform>
+        <DstInvGeoTransform>11190.5359033718323,0.00104869608727382858,0,4648.5791019174776,0,-0.00104869608727382858</DstInvGeoTransform>
         <ReprojectTransformer>
           <ReprojectionTransformer>
             <SourceSRS>GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AXIS["Latitude",NORTH],AXIS["Longitude",EAST],AUTHORITY["EPSG","4326"]]</SourceSRS>
             <TargetSRS>PROJCS["WGS 84 / Pseudo-Mercator",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Mercator_1SP"],PARAMETER["central_meridian",0],PARAMETER["scale_factor",1],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],EXTENSION["PROJ4","+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs"],AUTHORITY["EPSG","3857"]]</TargetSRS>
             <Options>
-              <Option key="CENTER_LONG">-75.8834</Option>
-              <Option key="AREA_OF_INTEREST">-84.81670474000001,37.20418600450101,-66.95004522000161,47.46251523450009</Option>
+              <Option key="CENTER_LONG">-81.4042</Option>
+              <Option key="AREA_OF_INTEREST">-95.85836699000001,24.52085774450121,-66.95004522000261,36.95418610450009</Option>
             </Options>
           </ReprojectionTransformer>
         </ReprojectTransformer>
